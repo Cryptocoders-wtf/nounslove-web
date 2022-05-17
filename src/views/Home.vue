@@ -1,37 +1,112 @@
 <template>
   <div class="home">
-    <div class="flex justify-center items-center space-x-8">
+    <div class="justify-center items-center space-x-8">
       <!-- Use Tailwind CSS h-40 (=10rem=160px) instead of .logo. -->
-      <img
-        alt="Firebase logo"
-        src="../assets/firebase.svg"
-        class="h-40 object-contain"
-      />
+      <div v-if="!hasMetaMask">
+        Please install MetaMask.
+      </div>
+      <div v-else>
+        <div v-if="loading">
+          Minting...
+        </div>
+        <div v-else>
+          <button @click="mintNouns" 
+                  class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 
-      <!-- Use Tailwind CSS h-40 (=10rem=160px) instead of .logo. -->
-      <img alt="Vue logo" src="../assets/logo.png" class="h-40" />
-
-      <svg
-        class="fill-current text-tailwindcss-logo-mark w-40"
-        viewBox="0 0 50 32"
-      >
-        <path
-          d="M25.517 0C18.712 0 14.46 3.382 12.758 10.146c2.552-3.382 5.529-4.65 8.931-3.805 1.941.482 3.329 1.882 4.864 3.432 2.502 2.524 5.398 5.445 11.722 5.445 6.804 0 11.057-3.382 12.758-10.145-2.551 3.382-5.528 4.65-8.93 3.804-1.942-.482-3.33-1.882-4.865-3.431C34.736 2.92 31.841 0 25.517 0zM12.758 15.218C5.954 15.218 1.701 18.6 0 25.364c2.552-3.382 5.529-4.65 8.93-3.805 1.942.482 3.33 1.882 4.865 3.432 2.502 2.524 5.397 5.445 11.722 5.445 6.804 0 11.057-3.381 12.758-10.145-2.552 3.382-5.529 4.65-8.931 3.805-1.941-.483-3.329-1.883-4.864-3.432-2.502-2.524-5.398-5.446-11.722-5.446z"
-        />
-      </svg>
+                  >Mint Your Noun</button>
+        </div>
+      </div>
+      <div v-if="nftData && !loading">
+        <div v-if="tokenId">
+          <a :href="`https://testnets.opensea.io/assets/${contractAddress}/${tokenId}`" target="_blank">OpenSea Link</a>
+        </div>
+        <div>{{nftData.name}}</div>
+        <div>{{nftData.description}}</div>
+        <div class="text-center">
+          <img :src="nftData.image" />
+        </div>
+      </div>
     </div>
-    <HelloWorld />
+
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { defineComponent, ref } from "vue";
+import Web3 from "web3";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const nounsTokenJson11 = require("./NounsTokenb75Ea83B3823052CC4Eac3399584B629ee410F05.json");
+
+const chainId = '3';
 
 export default defineComponent({
   name: "HomePage",
   components: {
-    HelloWorld,
+
+  },
+  setup() {
+    const loading = ref(false);
+    const web3 = new Web3((window as any).ethereum);
+    const hasMetaMask = Web3.givenProvider.isMetaMask;
+
+    const tokenId = ref();
+    const res = ref();
+    const nftData = ref();
+    const contractAddress = "0xb75Ea83B3823052CC4Eac3399584B629ee410F05";
+
+    const contract = new web3.eth.Contract(nounsTokenJson11.abi,contractAddress);
+
+    const getCurrentToken = async () => {
+      const id = await contract.methods.getCurrentToken().call();
+      tokenId.value = id - 1;
+      const dataURI = await contract.methods.dataURI(tokenId.value).call();
+
+      const acccounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
+      const a = await contract.methods.ownerOf(tokenId.value).call();
+      console.log(a, acccounts);
+
+      nftData.value = JSON.parse(
+        Buffer.from(dataURI.substring(29), 'base64').toString('ascii'),
+      );
+      const svg = Buffer.from(nftData.value.image.substring(26), 'base64');
+
+    };
+    getCurrentToken();
+    const mintNouns = async () => {
+      const acccounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
+
+      const sender_address = acccounts[0];
+
+      const tx = {
+        'from': sender_address,
+        'to': contractAddress,
+        'chainId': chainId,
+         value: web3.utils.toWei("0.01", "ether"),
+        'data': contract.methods.mint2().encodeABI()
+      } as any;
+      
+      loading.value = true;
+      try {
+        const res = await web3.eth.sendTransaction(tx);
+        console.log(res);
+        await getCurrentToken();
+      } catch(e) {
+        console.log(e);
+        alert("sorry");
+      }
+      loading.value = false;
+    };
+
+
+    return {
+      hasMetaMask,
+      loading,
+      mintNouns,
+      nftData,
+      tokenId,
+      contractAddress,
+    };
   },
 });
 </script>

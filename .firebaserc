@@ -1,5 +1,17 @@
 {
   "projects": {
-    "default": "fir-vue-startup-kit"
+    "default": "nounslove-b8500"
+  },
+  "targets": {
+    "nounslove-b8500": {
+      "hosting": {
+        "prod": [
+          "nounslove-b8500"
+        ],
+        "dev": [
+          "nounslove-dev"
+        ]
+      }
+    }
   }
 }
