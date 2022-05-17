@@ -6,8 +6,11 @@
     </template>
     <template v-else>
       <router-link :to="localizedUrl('/')">Home</router-link> |
-      <router-link :to="localizedUrl('/about')">About</router-link> |
+      <router-link :to="localizedUrl('/about')">About</router-link>
     </template>
+  </div>
+  <div class="font-londrina m-4">
+    <h1 class="text-4xl">Nouns Love💖</h1>
   </div>
   <Suspense>
     <router-view />
@@ -47,7 +50,7 @@ export default defineComponent({
 
 #nav {
   /* padding: 30px; */
-  @apply p-8;
+  /* @apply p-8; */
 }
 
 #nav a {
