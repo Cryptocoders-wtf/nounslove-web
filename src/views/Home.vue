@@ -36,7 +36,9 @@ import { defineComponent, ref } from "vue";
 import Web3 from "web3";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const nounsTokenJson11 = require("./NounsTokenb75Ea83B3823052CC4Eac3399584B629ee410F05.json");
+const nounsTokenJson11 = require("./NounsToken9331f10808.json");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+// const nounsTokenJson11 = require("./NounsTokenb75Ea83B3823052CC4Eac3399584B629ee410F05.json"); // old
 
 const chainId = '3';
 
@@ -53,13 +55,27 @@ export default defineComponent({
     const tokenId = ref();
     const res = ref();
     const nftData = ref();
-    const contractAddress = "0xb75Ea83B3823052CC4Eac3399584B629ee410F05";
+    const contractAddress = "0x9331f10808aC6039F92019256Df2636D70a10E5B";
 
     const contract = new web3.eth.Contract(nounsTokenJson11.abi,contractAddress);
 
+    const eventObj = ref<{[key: string]: any}>({});
+    contract.events.Transfer(
+      {fromBlock: 0},
+      (error: any, event: any) => {
+        const newEvent = {...eventObj.value};
+        newEvent[event.blockHash] = event;
+        eventObj.value = newEvent;
+      }
+    );
+    
     const getCurrentToken = async () => {
       const id = await contract.methods.getCurrentToken().call();
+      if (id === 0) {
+        return;
+      }
       tokenId.value = id - 1;
+      console.log( tokenId.value);
       const dataURI = await contract.methods.dataURI(tokenId.value).call();
 
       const acccounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
@@ -78,14 +94,18 @@ export default defineComponent({
 
       const sender_address = acccounts[0];
 
+    let gas = 20145300;
+      let gasPrice = '19400000170';
       const tx = {
         'from': sender_address,
         'to': contractAddress,
         'chainId': chainId,
-         value: web3.utils.toWei("0.01", "ether"),
-        'data': contract.methods.mint2().encodeABI()
+        // value: web3.utils.toWei("0.01", "ether"),
+        'gas': gas,
+        'gasPrice': gasPrice,
+        'data': contract.methods.buy( tokenId.value).encodeABI()
       } as any;
-      
+      //console.log(tx);
       loading.value = true;
       try {
         const res = await web3.eth.sendTransaction(tx);
