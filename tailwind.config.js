@@ -4,7 +4,13 @@ module.exports = {
     './src/**/*.{js,jsx,ts,tsx,vue}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        'londrina': ['Londrina Solid'],
+        'pt-root': ['PT Root UI', 'sans-serif'],
+        'yusei': ['Yusei Magic', 'sans-serif']
+      },
+    },
   },
   plugins: [],
 }

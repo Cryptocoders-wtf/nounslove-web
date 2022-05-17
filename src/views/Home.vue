@@ -1,6 +1,9 @@
 <template>
   <div class="home">
     <div class="justify-center items-center space-x-8">
+      <div class="font-londrina">
+        <h1>Nouns Love💖</h1>
+      </div>
       <!-- Use Tailwind CSS h-40 (=10rem=160px) instead of .logo. -->
       <div v-if="!hasMetaMask">
         Please install MetaMask.

@@ -7,7 +7,6 @@
     <template v-else>
       <router-link :to="localizedUrl('/')">Home</router-link> |
       <router-link :to="localizedUrl('/about')">About</router-link> |
-      <router-link :to="localizedUrl('/account')">Signin</router-link>
     </template>
   </div>
   <Suspense>
@@ -33,6 +32,10 @@ export default defineComponent({
 </script>
 
 <style>
+@import url('https://fonts.googleapis.com/css?family=Londrina+Solid&display=swap');
+@import url('https://fonts.cdnfonts.com/css/pt-root-ui');
+@import url('https://fonts.googleapis.com/css2?family=Yusei+Magic&display=swap');
+
 #app {
   /* font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
