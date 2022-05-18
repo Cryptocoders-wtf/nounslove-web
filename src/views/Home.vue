@@ -36,7 +36,7 @@ import { defineComponent, ref } from "vue";
 import Web3 from "web3";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const nounsTokenJson11 = require("./NounsToken9331f10808.json");
+const nounsTokenJson11 = require("./Greeter5fbdb2315678af.json");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 // const nounsTokenJson11 = require("./NounsTokenb75Ea83B3823052CC4Eac3399584B629ee410F05.json"); // old
 
@@ -49,43 +49,20 @@ export default defineComponent({
   },
   setup() {
     const loading = ref(false);
-    const web3 = new Web3((window as any).ethereum);
+    const web3 = new Web3('http://localhost:8545');
     const hasMetaMask = Web3.givenProvider.isMetaMask;
 
     const tokenId = ref();
     const res = ref();
     const nftData = ref();
-    const contractAddress = "0x9331f10808aC6039F92019256Df2636D70a10E5B";
+    const contractAddress = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
 
     const contract = new web3.eth.Contract(nounsTokenJson11.abi,contractAddress);
 
-    const eventObj = ref<{[key: string]: any}>({});
-    contract.events.Transfer(
-      {fromBlock: 0},
-      (error: any, event: any) => {
-        const newEvent = {...eventObj.value};
-        newEvent[event.blockHash] = event;
-        eventObj.value = newEvent;
-      }
-    );
     
     const getCurrentToken = async () => {
-      const id = await contract.methods.getCurrentToken().call();
-      if (id === 0) {
-        return;
-      }
-      tokenId.value = id - 1;
-      console.log( tokenId.value);
-      const dataURI = await contract.methods.dataURI(tokenId.value).call();
-
-      const acccounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
-      const a = await contract.methods.ownerOf(tokenId.value).call();
-      console.log(a, acccounts);
-
-      nftData.value = JSON.parse(
-        Buffer.from(dataURI.substring(29), 'base64').toString('ascii'),
-      );
-      const svg = Buffer.from(nftData.value.image.substring(26), 'base64');
+      const id = await contract.methods.hello().call();
+      console.log(id)
 
     };
     getCurrentToken();

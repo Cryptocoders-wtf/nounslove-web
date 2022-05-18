@@ -13,7 +13,7 @@ module.exports = {
     resolve: {
       fallback: {
         "buffer": require.resolve('buffer/'),
-        "http": false,
+        "http": 'agent-base',
         "https": 'agent-base',
         "stream": false,
         "crypto": false,
