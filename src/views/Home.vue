@@ -36,11 +36,13 @@ import { defineComponent, ref } from "vue";
 import Web3 from "web3";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const nounsTokenJson11 = require("./Greeter5fbdb2315678af.json");
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-// const nounsTokenJson11 = require("./NounsTokenb75Ea83B3823052CC4Eac3399584B629ee410F05.json"); // old
+const nounsTokenJson = require("./NounsTokenLocal.json");
+                              
+//const chainId = '3';
+const chainId = 1337;
 
-const chainId = '3';
+// import { INounsSeeder } from './interfaces/INounsSeeder.sol';
+
 
 export default defineComponent({
   name: "HomePage",
@@ -55,39 +57,42 @@ export default defineComponent({
     const tokenId = ref();
     const res = ref();
     const nftData = ref();
-    const contractAddress = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
+    const currentToken = ref(0);
+    const contractAddress = "0x071586BA1b380B00B793Cc336fe01106B0BFbE6D"; // desc for actual nouns
+    const contract = new web3.eth.Contract(nounsTokenJson.abi, contractAddress); 
 
-    const contract = new web3.eth.Contract(nounsTokenJson11.abi,contractAddress);
-
-    
-    const getCurrentToken = async () => {
-      const id = await contract.methods.hello().call();
+    const getCurrentToken3 = async () => {
+      const id = await contract.methods.price().call();
       console.log(id)
 
+      currentToken.value = await contract.methods.getCurrentToken().call();
+      console.log(currentToken.value);
     };
-    getCurrentToken();
+
+    getCurrentToken3();
+
     const mintNouns = async () => {
       const acccounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
-
       const sender_address = acccounts[0];
 
-    let gas = 20145300;
-      let gasPrice = '19400000170';
+      let gas = 20145300;
+      let gasPrice = '194000001700';
       const tx = {
         'from': sender_address,
         'to': contractAddress,
-        'chainId': chainId,
-        // value: web3.utils.toWei("0.01", "ether"),
+        // 'chainId': chainId,
+        value: web3.utils.toWei("1", "ether"),
         'gas': gas,
         'gasPrice': gasPrice,
-        'data': contract.methods.buy( tokenId.value).encodeABI()
+        'data': contract.methods.buy(currentToken.value - 1).encodeABI()
       } as any;
-      //console.log(tx);
+      console.log(tx);
       loading.value = true;
       try {
         const res = await web3.eth.sendTransaction(tx);
         console.log(res);
-        await getCurrentToken();
+        await getCurrentToken3();
+
       } catch(e) {
         console.log(e);
         alert("sorry");
