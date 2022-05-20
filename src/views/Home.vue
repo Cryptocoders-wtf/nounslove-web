@@ -27,12 +27,14 @@
         </div>
       </div>
     </div>
-
+    <div v-for="(tokenId, key) in nftKeys" :key="key">
+      <img :src="nfts[tokenId].image" />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch, computed } from "vue";
 import Web3 from "web3";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -58,22 +60,62 @@ export default defineComponent({
     const res = ref();
     const nftData = ref();
     const currentToken = ref(0);
-    const contractAddress = "0x071586BA1b380B00B793Cc336fe01106B0BFbE6D"; // desc for actual nouns
+    const contractAddress = "0x1780bCf4103D3F501463AD3414c7f4b654bb7aFd"; // desc for actual nouns
     const contract = new web3.eth.Contract(nounsTokenJson.abi, contractAddress); 
 
+    const nfts = ref<{[key: string]: any}>({});
+
+    /*
+    contract.getPastEvents("NounCreated", console.log);
+    contract.events.NounCreated().on('data', (event: any) => {
+        console.log(event);
+      })
+      .on('error', console.error);
+    */
+    
     const getCurrentToken3 = async () => {
-      const id = await contract.methods.price().call();
-      console.log(id)
+      // const id = await contract.methods.price().call();
+      // console.log(id)
 
       currentToken.value = await contract.methods.getCurrentToken().call();
       console.log(currentToken.value);
     };
-
+    const updateNFT = (index: string, nft: any) => {
+      const newNfts = {...nfts.value}
+      newNfts[index] = nft;
+      nfts.value = newNfts;
+      
+    };
+    watch(currentToken, async () => {
+      const arr = [0, 1, 2, 3,4,5,6,7,8,9];
+      await Promise.all(arr.map(async (i: number) => {
+        const index = currentToken.value -1 - i;
+        if (index > 0 && !nfts.value[String(index)]) {
+          const dataURI = await contract.methods.dataURI(index).call();
+          const data = JSON.parse(
+            Buffer.from(dataURI.substring(29), 'base64').toString('ascii'),
+          );
+          updateNFT(String(index), data);
+          console.log(data);
+          console.log(data.image)
+          // svgData.value = data.image;
+          
+          console.log(index);
+        }
+      }));
+    });
+    
     getCurrentToken3();
 
     const mintNouns = async () => {
       const acccounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
       const sender_address = acccounts[0];
+      
+      console.log(currentToken.value);
+      console.log(currentToken.value === 0)
+      const method = (currentToken.value == 0) ?
+        contract.methods.mint().encodeABI() :
+        contract.methods.buy(currentToken.value - 1).encodeABI()
 
       let gas = 20145300;
       let gasPrice = '194000001700';
@@ -81,10 +123,10 @@ export default defineComponent({
         'from': sender_address,
         'to': contractAddress,
         // 'chainId': chainId,
-        value: web3.utils.toWei("1", "ether"),
+        value: web3.utils.toWei("0.9", "ether"),
         'gas': gas,
         'gasPrice': gasPrice,
-        'data': contract.methods.buy(currentToken.value - 1).encodeABI()
+        'data': method,
       } as any;
       console.log(tx);
       loading.value = true;
@@ -100,6 +142,11 @@ export default defineComponent({
       loading.value = false;
     };
 
+    const nftKeys = computed(() => {
+      return Object.keys(nfts.value).sort((a, b) => {
+        return a > b ? -1 : 1;
+      });
+    });
 
     return {
       hasMetaMask,
@@ -108,6 +155,9 @@ export default defineComponent({
       nftData,
       tokenId,
       contractAddress,
+
+      nfts,
+      nftKeys,
     };
   },
 });
