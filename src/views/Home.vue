@@ -5,139 +5,228 @@
       <div v-if="!hasMetaMask">
         Please install MetaMask.
       </div>
-      <div v-else>
+      <div v-else class="mx-8">
         <div v-if="loading">
-          Minting...
+          Processing...
         </div>
         <div v-else>
+          <div>
+            Current Price: {{ currentPrice }} Eth</div>
           <button @click="mintNouns" 
                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 
-                  >Mint Your Noun</button>
+                  >Get Your Noun</button>
         </div>
+
+        <div class="mt-2">
+          <div v-if="!nftKeys.includes(String(currentToken))">
+            minting new one....
+          </div>
+          <div v-for="(tokenId, key) in nftKeys" :key="key" class="mb-2">
+            <div class="flex">
+
+              <div class="flex-1">
+                <a :href="`https://testnets.opensea.io/assets/${contractAddress}/${tokenId}`" target="_blank">
+                  <img :src="nfts[tokenId].data?.image" class="w-120" v-if="String(currentToken) == tokenId" />
+                  <img :src="nfts[tokenId].data?.image" class="w-32" v-else/>
+                </a>
+              </div>
+              <div class="flex-1">
+                <span v-if="wons[tokenId]" class="text-red-600 font-bold">
+                  You wons!!
+                </span>
+                <span v-else-if="buying[tokenId]" class="text-red-600 font-bold">
+                  You are buying....
+                </span>
+                <span v-else-if="currentToken == tokenId" class="text-red-600 font-bold">
+                  Now accepting bids
+                </span><br/>
+                {{nfts[tokenId].data?.name}}<br/>
+                {{nfts[tokenId].data?.description}}
+                <span v-if="accounts.includes(nfts[tokenId]?.owner)" class="text-red-600 font-bold">
+                  {{(nfts[tokenId].owner||"").substr(0, 10)}}<br/>
+                </span>
+                <span v-else>
+                  {{(nfts[tokenId].owner||"").substr(0, 10)}}<br/>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
       </div>
-      <div v-if="nftData && !loading">
-        <div v-if="tokenId">
-          <a :href="`https://testnets.opensea.io/assets/${contractAddress}/${tokenId}`" target="_blank">OpenSea Link</a>
-        </div>
-        <div>{{nftData.name}}</div>
-        <div>{{nftData.description}}</div>
-        <div class="text-center">
-          <img :src="nftData.image" />
-        </div>
-      </div>
-    </div>
-    <div v-for="(tokenId, key) in nftKeys" :key="key">
-      <img :src="nfts[tokenId].image" />
+      <!-- end of show -->
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, computed } from "vue";
-import Web3 from "web3";
+import { defineComponent, ref, reactive, watch, computed } from "vue";
+import { ethers } from "ethers";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const nounsTokenJson = require("./NounsTokenLocal.json");
-                              
-//const chainId = '3';
-const chainId = 1337;
 
-// import { INounsSeeder } from './interfaces/INounsSeeder.sol';
 
+
+import { useTimerBase, currentTime } from "../utils/utils";
 
 export default defineComponent({
   name: "HomePage",
   components: {
-
+    
   },
   setup() {
     const loading = ref(false);
-    const web3 = new Web3('http://localhost:8545');
-    const hasMetaMask = Web3.givenProvider.isMetaMask;
-
-    const tokenId = ref();
-    const res = ref();
-    const nftData = ref();
-    const currentToken = ref(0);
-    const contractAddress = "0x1780bCf4103D3F501463AD3414c7f4b654bb7aFd"; // desc for actual nouns
-    const contract = new web3.eth.Contract(nounsTokenJson.abi, contractAddress); 
-
+     
+    const nextToken = ref(0);
+    // const contractAddress = "0x8B190573374637f144AC8D37375d97fd84cBD3a0"; // desc for actual nouns for local
+    const contractAddress = "0xA409B4d308D6234b1E47b63ae1AEbE4fb5030D2a"; // desc for actual nouns // for rinkeby
+    
+    const mintTime = ref(0);
     const nfts = ref<{[key: string]: any}>({});
 
-    /*
-    contract.getPastEvents("NounCreated", console.log);
-    contract.events.NounCreated().on('data', (event: any) => {
-        console.log(event);
-      })
-      .on('error', console.error);
-    */
+    const maxPrice = ref(1);
+    const minPrice = ref(0.005);
+    const priceDelta = ref(0.015);
+    const timeDelta = ref(60); // second
     
-    const getCurrentToken3 = async () => {
-      // const id = await contract.methods.price().call();
-      // console.log(id)
-
-      currentToken.value = await contract.methods.getCurrentToken().call();
+    const accounts = ref<string[]>([]);
+    const buying = reactive<{[key: string]: boolean}>({});
+    const wons = reactive<{[key: string]: boolean}>({});
+    
+    const hasMetaMask = !!((window as any).ethereum);
+    if (!hasMetaMask) {
+      return { hasMetaMask: false};
+    }
+    
+    const provider = new ethers.providers.Web3Provider((window as any).ethereum);
+    const contract = new ethers.Contract(contractAddress, nounsTokenJson.abi, provider);
+    
+    
+    const now = useTimerBase(currentTime);
+    
+    const updateNftData = async (tokenId: string) => {
+      const dataURI = await contract.functions.dataURI(tokenId);
+      const data = JSON.parse(
+        Buffer.from(dataURI[0].substring(29), 'base64').toString('ascii'),
+      );
+      updateNFT(String(tokenId), "data", data);
+    };
+    const updateOwnerData = async (tokenId: string) => {
+      const owner = await contract.functions.ownerOf(tokenId);
+      updateNFT(String(tokenId), "owner", owner[0]);
+      return owner[0];
+    };
+    
+    contract.on("NounCreated", (event) => {
+      updateNextToken();
+    });
+    contract.on("MintTimeUpdated", (event) => {
+      updateMintTime(event.toNumber());
+    });
+    contract.on("NounBought", (tokenId, owner) => {
+      console.log("buy", tokenId);
+      updateNFT(tokenId.toString(), "owner", owner);
+      if (buying[tokenId.toString()]) {
+        console.log(owner, accounts.value[0]);
+        if (owner == accounts.value[0]) {
+          alert("you won");
+          wons[tokenId.toString()] = true;
+        }
+      }
+          
+      buying[tokenId.toString()] = false;
+    });
+    const updateMintTime = (newMintTime: number) => {
+      if (newMintTime > mintTime.value) {
+        mintTime.value = newMintTime
+      }
+    };
+    
+    const updateNextToken = async () => {
+      const _minttime = await contract.functions.getMintTime();
+      updateMintTime(_minttime[0].toNumber());
+      const res = await contract.functions.getCurrentToken();
+      nextToken.value = res[0].toString();
       console.log(currentToken.value);
     };
-    const updateNFT = (index: string, nft: any) => {
+    
+    const currentToken = computed(() => {
+      if (nextToken.value > 0) {
+        return nextToken.value - 1;
+      }
+      return 0;
+    });
+
+    const updateNFT = (index: string, key: string, nft: any) => {
       const newNfts = {...nfts.value}
-      newNfts[index] = nft;
+      const newData = {...nfts.value[index]} || {};
+      newData[key] = nft;
+      newNfts[index] = newData;
       nfts.value = newNfts;
       
     };
+    const initPrice = async () => {
+      const priceData = await contract.functions.getPriceData();
+      const [a, b, c, d, e] = priceData[0];
+      
+      maxPrice.value = a / (10**18);
+      minPrice.value = b / (10**18);
+      priceDelta.value = c / (10**18);
+      
+      accounts.value = await provider.listAccounts();
+    };
+    initPrice();
+    
+    const currentPrice = computed(() => {
+      const timeDelta = 60; // second
+      
+      const timeDiff = now.value - mintTime.value - 300;
+      if (timeDiff < timeDelta ) {
+        return maxPrice.value;
+      }
+      const priceDiff = (Math.round(timeDiff / timeDelta)  )* priceDelta.value;
+      if (priceDiff >= maxPrice.value - minPrice.value) {
+        return minPrice.value;
+      }
+      return maxPrice.value - priceDiff;
+
+    });
+    
     watch(currentToken, async () => {
       const arr = [0, 1, 2, 3,4,5,6,7,8,9];
       await Promise.all(arr.map(async (i: number) => {
-        const index = currentToken.value -1 - i;
-        if (index > 0 && !nfts.value[String(index)]) {
-          const dataURI = await contract.methods.dataURI(index).call();
-          const data = JSON.parse(
-            Buffer.from(dataURI.substring(29), 'base64').toString('ascii'),
-          );
-          updateNFT(String(index), data);
-          console.log(data);
-          console.log(data.image)
-          // svgData.value = data.image;
-          
-          console.log(index);
+        const index = currentToken.value - i;
+        if (index >= 0 && !nfts.value[String(index)]) {
+          updateNftData(String(index));
+          updateOwnerData(String(index));
         }
       }));
     });
     
-    getCurrentToken3();
+    updateNextToken();
 
     const mintNouns = async () => {
-      const acccounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
-      const sender_address = acccounts[0];
+      await provider.send("eth_requestAccounts", []);
       
-      console.log(currentToken.value);
-      console.log(currentToken.value === 0)
-      const method = (currentToken.value == 0) ?
-        contract.methods.mint().encodeABI() :
-        contract.methods.buy(currentToken.value - 1).encodeABI()
+      const signer = provider.getSigner()
+      const contractWithSigner = new ethers.Contract(contractAddress, nounsTokenJson.abi, signer);
 
-      let gas = 20145300;
-      let gasPrice = '194000001700';
-      const tx = {
-        'from': sender_address,
-        'to': contractAddress,
-        // 'chainId': chainId,
-        value: web3.utils.toWei("0.9", "ether"),
-        'gas': gas,
-        'gasPrice': gasPrice,
-        'data': method,
-      } as any;
-      console.log(tx);
-      loading.value = true;
+      loading.value = true
       try {
-        const res = await web3.eth.sendTransaction(tx);
-        console.log(res);
-        await getCurrentToken3();
+        if (currentToken.value == 0) {
+          await contractWithSigner.functions.mint();
+        } else {
+          buying[currentToken.value] = true;
+          const options = {value: ethers.utils.parseEther(String(currentPrice.value))}
+          await contractWithSigner.functions.buy(currentToken.value, options);
+        }
+        await updateNextToken();
 
       } catch(e) {
         console.log(e);
-        alert("sorry");
+        alert("sorry. Someone has won or the bid price is low.");
       }
       loading.value = false;
     };
@@ -152,12 +241,17 @@ export default defineComponent({
       hasMetaMask,
       loading,
       mintNouns,
-      nftData,
-      tokenId,
       contractAddress,
 
       nfts,
       nftKeys,
+
+      currentPrice,
+      currentToken,
+
+      accounts,
+      buying,
+      wons,
     };
   },
 });
