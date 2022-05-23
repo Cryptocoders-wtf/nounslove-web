@@ -2,6 +2,9 @@
   <div class="home">
     <div class="justify-center items-center space-x-8">
       <!-- Use Tailwind CSS h-40 (=10rem=160px) instead of .logo. -->
+      <Animation 
+        v-show="fireOn"
+        />
       <div v-if="!hasMetaMask">
         Please install MetaMask.
       </div>
@@ -32,23 +35,34 @@
                 </a>
               </div>
               <div class="flex-1">
-                <span v-if="wons[tokenId]" class="text-red-600 font-bold">
-                  You wons!!
-                </span>
-                <span v-else-if="buying[tokenId]" class="text-red-600 font-bold">
-                  You are buying....
-                </span>
-                <span v-else-if="currentToken == tokenId" class="text-red-600 font-bold">
-                  Now accepting bids
-                </span><br/>
-                {{nfts[tokenId].data?.name}}<br/>
-                {{nfts[tokenId].data?.description}}
-                <span v-if="accounts.includes(nfts[tokenId]?.owner)" class="text-red-600 font-bold">
+                <div>
+                  <span v-if="accounts.includes(nfts[tokenId]?.owner)" class="text-red-600 font-bold">
+                    You wons!!
+                  </span>
+                  <span v-if="buying[tokenId]" class="text-red-600 font-bold">
+                    You are buying....
+                    <div className="flex justify-center">
+                      <div className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"></div>
+                    </div>
+                  </span>
+                  <span v-else-if="currentToken == tokenId" class="text-red-600 font-bold">
+                    Now accepting bids
+                  </span>
+                </div>
+                <div>
+                  {{nfts[tokenId].data?.name}}<br/>
+                </div>
+                <div>
+                  {{nfts[tokenId].data?.description}}
+                </div>
+                <div>
+                  <span v-if="accounts.includes(nfts[tokenId]?.owner)" class="text-red-600 font-bold">
                   {{(nfts[tokenId].owner||"").substr(0, 10)}}<br/>
-                </span>
-                <span v-else>
-                  {{(nfts[tokenId].owner||"").substr(0, 10)}}<br/>
-                </span>
+                  </span>
+                  <span v-else>
+                    {{(nfts[tokenId].owner||"").substr(0, 10)}}<br/>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -66,21 +80,20 @@ import { ethers } from "ethers";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const nounsTokenJson = require("./NounsTokenLocal.json");
+import { useTimerBase, currentTime, sleep } from "../utils/utils";
 
-
-
-import { useTimerBase, currentTime } from "../utils/utils";
+import Animation from "./Animation.vue";
 
 export default defineComponent({
   name: "HomePage",
   components: {
-    
+    Animation,
   },
   setup() {
     const loading = ref(false);
      
     const nextToken = ref(0);
-    // const contractAddress = "0x8B190573374637f144AC8D37375d97fd84cBD3a0"; // desc for actual nouns for local
+    //const contractAddress = "0x8B190573374637f144AC8D37375d97fd84cBD3a0"; // desc for actual nouns for local
     const contractAddress = "0xA409B4d308D6234b1E47b63ae1AEbE4fb5030D2a"; // desc for actual nouns // for rinkeby
     
     const mintTime = ref(0);
@@ -94,6 +107,14 @@ export default defineComponent({
     const accounts = ref<string[]>([]);
     const buying = reactive<{[key: string]: boolean}>({});
     const wons = reactive<{[key: string]: boolean}>({});
+
+    const fireOn = ref(false);
+    const fire = async () => {
+      fireOn.value = true;
+      await sleep(7);
+      fireOn.value = false;
+      
+    };
     
     const hasMetaMask = !!((window as any).ethereum);
     if (!hasMetaMask) {
@@ -107,11 +128,15 @@ export default defineComponent({
     const now = useTimerBase(currentTime);
     
     const updateNftData = async (tokenId: string) => {
-      const dataURI = await contract.functions.dataURI(tokenId);
-      const data = JSON.parse(
-        Buffer.from(dataURI[0].substring(29), 'base64').toString('ascii'),
-      );
-      updateNFT(String(tokenId), "data", data);
+      try {
+        const dataURI = await contract.functions.dataURI(tokenId);
+        const data = JSON.parse(
+          Buffer.from(dataURI[0].substring(29), 'base64').toString('ascii'),
+        );
+        updateNFT(String(tokenId), "data", data);
+      } catch(e) {
+        updateNFT(String(tokenId), "data", {name: "broken"});
+      }
     };
     const updateOwnerData = async (tokenId: string) => {
       const owner = await contract.functions.ownerOf(tokenId);
@@ -131,7 +156,8 @@ export default defineComponent({
       if (buying[tokenId.toString()]) {
         console.log(owner, accounts.value[0]);
         if (owner == accounts.value[0]) {
-          alert("you won");
+          // alert("you won");
+          fire();
           wons[tokenId.toString()] = true;
         }
       }
@@ -190,7 +216,7 @@ export default defineComponent({
       if (priceDiff >= maxPrice.value - minPrice.value) {
         return minPrice.value;
       }
-      return maxPrice.value - priceDiff;
+      return Math.round((maxPrice.value - priceDiff) * (10 ** 8))/ (10 ** 8) ;
 
     });
     
@@ -220,7 +246,8 @@ export default defineComponent({
         } else {
           buying[currentToken.value] = true;
           const options = {value: ethers.utils.parseEther(String(currentPrice.value))}
-          await contractWithSigner.functions.buy(currentToken.value, options);
+          const res = await contractWithSigner.functions.buy(currentToken.value, options);
+          console.log(res.hash);
         }
         await updateNextToken();
 
@@ -233,7 +260,7 @@ export default defineComponent({
 
     const nftKeys = computed(() => {
       return Object.keys(nfts.value).sort((a, b) => {
-        return a > b ? -1 : 1;
+        return Number(a) > Number(b) ? -1 : 1;
       });
     });
 
@@ -252,7 +279,10 @@ export default defineComponent({
       accounts,
       buying,
       wons,
-    };
+
+      fireOn,
+      
+    }
   },
 });
 </script>
