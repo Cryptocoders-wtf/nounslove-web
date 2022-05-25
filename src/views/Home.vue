@@ -160,6 +160,7 @@ import Languages from "@/components/Languages.vue";
 import Message from "@/components/Message.vue";
 
 import { useStore } from "vuex";
+import { useI18n } from "vue-i18n";
 
 export default defineComponent({
   name: "HomePage",
@@ -170,6 +171,7 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
+    const i18n = useI18n();
     const loading = ref(false);
     
     const nextToken = ref(0);
@@ -372,7 +374,8 @@ export default defineComponent({
         await updateNextToken();
       } catch (e) {
         console.log(e);
-        alert("sorry. Someone has won or the bid price is low.");
+        buying[currentToken.value] = false;
+        alert(i18n.t("sorryLowPrice"));
       }
       loading.value = false;
     };
@@ -387,7 +390,7 @@ export default defineComponent({
           loop = false;
           if (receipt.status == 0) {
             buying[currentToken.value] = false;
-            alert("sorry. Your request is failed. Someone has won or the gas price is low.");
+            alert(i18n.t("sorryLowGasPrice"));
           }
         }
         console.log("loop");

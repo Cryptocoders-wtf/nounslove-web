@@ -11,6 +11,8 @@ const lang = {
   getNoun: "Nounish NFTをゲット",
   heldBy: "オーナー: ",
   winningPrice: "落札価格:",
+  sorryLowPrice: "誰かが落札したか、入札価格が低いです。",
+  sorryLowGasPrice: "ガス代が不足しているため、処理に失敗しました。",
   languages,
 };
 

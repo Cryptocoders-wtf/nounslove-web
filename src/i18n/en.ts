@@ -11,7 +11,8 @@ const lang = {
   getNoun: "Get Your Nounish",
   heldBy: "Held by",
   winningPrice: "Winning Price",
-
+  sorryLowPrice: "Sorry. Someone has won or the bid price is low.",
+  sorryLowGasPrice: "Sorry. Your request is failed. Someone has won or the gas price is low.",
   languages,
 };
 
