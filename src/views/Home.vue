@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <div class="justify-center items-center font-pt-root">
-      <div>
+      <div class="w-full h-full">
         <Animation 
           v-show="fireOn"
           />
@@ -17,14 +17,14 @@
                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                   >{{ $t("getNoun") }}</button>
         </div>
-        <div v-if="nfts[currentToken]" class="sm:flex">
+        <div v-if="nfts[currentToken] && !fireOn" class="sm:flex">
           
-          <div class="relative sm:w-1/2 w-full" :class="bgColor">
+          <div class="sm:w-1/2 w-full" :class="bgColor">
             <a :href="`https://testnets.opensea.io/assets/${contractAddress}/${currentToken}`" target="_blank">
               <img :src="nfts[currentToken].data?.image" class="w-full" />
             </a>
           </div>
-          <div class="flex flex-1 flex-col sm:w-1/2 w-full pb-4 px-4 md:bg-white" :class="bgSmColor">
+          <div class="flex flex-1 flex-col sm:w-1/2 w-full pb-4 px-4" :class="bgSmColor">
             <span class="text-red-600 font-bold">
               {{ $t("acceptingBits") }}
             </span>
@@ -32,7 +32,7 @@
             <div class="text-left font-londrina text-4xl">
               {{nfts[currentToken].data?.name}}<br/>
             </div>
-            <div class="text-left font-bold">
+             <div class="text-left font-bold">
               {{nfts[currentToken].data?.description}}
             </div>
 
@@ -59,7 +59,7 @@
           </div>
         </div>
         <div v-else>
-          <div class="relative w-full h-60" :class="bgColor">
+          <div class="w-full h-60" :class="bgColor">
             <div class="pt-6 font-londrina text-4xl">
               minting new one....
               <div className="flex justify-center">
@@ -120,6 +120,7 @@
         
       </div>
       <!-- end of show -->
+      <div @click="fire" class="text-white">nouns love!!</div>
     </div>
   </div>
 </template>
@@ -163,7 +164,6 @@ export default defineComponent({
     
     const accounts = ref<string[]>([]);
     const buying = reactive<{[key: string]: boolean}>({});
-    const wons = reactive<{[key: string]: boolean}>({});
 
     const backgroundColor = ref("");
 
@@ -189,7 +189,6 @@ export default defineComponent({
 
     const provider = new ethers.providers.Web3Provider((window as any).ethereum);
     const contract = new ethers.Contract(contractAddress, nounsTokenJson.abi, provider);
-    
     
     const now = useTimerBase(currentTime);
     
@@ -223,14 +222,11 @@ export default defineComponent({
       updateMintTime(event.toNumber());
     });
     contract.on("NounBought", (tokenId, owner) => {
-      console.log("buy", tokenId);
       updateNFT(tokenId.toString(), "owner", owner);
       if (buying[tokenId.toString()]) {
-        console.log(owner, accounts.value[0]);
         if (owner == accounts.value[0]) {
           // alert("you won");
           fire();
-          wons[tokenId.toString()] = true;
         }
       }
           
@@ -247,9 +243,6 @@ export default defineComponent({
       updateMintTime(_minttime[0].toNumber());
       const res = await contract.functions.getCurrentToken();
       nextToken.value = res[0].toString();
-      console.log(currentToken.value);
-
-
     };
     
     const currentToken = computed(() => {
@@ -336,7 +329,6 @@ export default defineComponent({
           buying[currentToken.value] = true;
           const options = {value: ethers.utils.parseEther(String(currentPrice.value))}
           const res = await contractWithSigner.functions.buy(currentToken.value, options);
-          console.log(res.hash);
         }
         await updateNextToken();
 
@@ -367,10 +359,9 @@ export default defineComponent({
 
       accounts,
       buying,
-      wons,
 
       fireOn,
-      
+      fire,
       bgColor,
       bgSmColor,
     }
