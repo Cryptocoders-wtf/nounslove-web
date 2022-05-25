@@ -8,7 +8,7 @@ const lang = {
   installMetaMask: "Please install MetaMask.",
   acceptingBits: "Now accepting bids",
   currentPrice: "Current Price",
-  getNoun: "Get Your Noun",
+  getNoun: "Get Your Nounish",
   heldBy: "Held by",
   winningPrice: "Winning Price",
   

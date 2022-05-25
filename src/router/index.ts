@@ -33,7 +33,7 @@ const routes: Array<RouteRecordRaw> = [
     component: Layout,
     children: [
       {
-        path: "/:lang",
+        path: "/:lang(ja|en)",
         component: Blank,
         children: routeChildren,
       },

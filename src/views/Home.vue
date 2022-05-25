@@ -151,8 +151,8 @@ export default defineComponent({
     const loading = ref(false);
      
     const nextToken = ref(0);
-    // const contractAddress = "0x1c9fD50dF7a4f066884b58A05D91e4b55005876A"; // desc for actual nouns for local
-    const contractAddress = "0x1602155eB091F863e7e776a83e1c330c828ede19"; // desc for actual nouns // for rinkeby
+    const contractAddress = "0xaC47e91215fb80462139756f43438402998E4A3a"; // desc for actual nouns for local
+    // const contractAddress = "0x1602155eB091F863e7e776a83e1c330c828ede19"; // desc for actual nouns // for rinkeby
     
     const mintTime = ref(0);
     const nfts = ref<{[key: string]: any}>({});
@@ -232,6 +232,10 @@ export default defineComponent({
           
       buying[tokenId.toString()] = false;
     });
+
+    //provider.getTransactionReceipt("0x0792d7f2ae22399a17f8424f1424be178b49e1207101ebcf0e6497d57398dd97").then(function(transaction) {
+    //console.log(transaction);
+    //});
     const updateMintTime = (newMintTime: number) => {
       if (newMintTime > mintTime.value) {
         mintTime.value = newMintTime
@@ -329,6 +333,7 @@ export default defineComponent({
           buying[currentToken.value] = true;
           const options = {value: ethers.utils.parseEther(String(currentPrice.value))}
           const res = await contractWithSigner.functions.buy(currentToken.value, options);
+          console.log(res.hash);
         }
         await updateNextToken();
 

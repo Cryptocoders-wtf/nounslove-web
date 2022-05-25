@@ -27,7 +27,7 @@ export default defineComponent({
 
     return {
       particlesLoaded: () => {
-        console.log("A1");
+        console.log("");
       },
       particlesInit: async (engine: any) => {
         await loadFireworksPreset(engine);
