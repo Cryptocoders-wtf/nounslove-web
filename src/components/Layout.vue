@@ -1,7 +1,9 @@
 <template>
   <div class="layout">
     <template v-if="user.user"> {{ user.user.displayName }}!! </template>
-    <router-view />
+    <Suspense>
+      <router-view />
+    </Suspense>
   </div>
 </template>
 
@@ -26,8 +28,7 @@ export default defineComponent({
   async setup() {
     const store = useStore();
     const user = reactive<UserData>({ user: null });
-    useI18nParam();
-
+    
     onMounted(() => {
       auth.onAuthStateChanged((fbuser) => {
         if (fbuser) {

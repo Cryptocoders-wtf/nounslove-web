@@ -1,15 +1,7 @@
 <template>
   <div id="nav">
-    <template v-if="isSignedIn">
-      <router-link :to="localizedUrl('/')">Home</router-link> |
-      <router-link :to="localizedUrl('/about')">About</router-link>
-    </template>
-    <template v-else>
-      <router-link :to="localizedUrl('/')">Home</router-link> |
-      <router-link :to="localizedUrl('/about')">About</router-link>
-    </template>
   </div>
-  <div class="font-londrina m-4">
+  <div class="font-londrina" :class="bgColor">
     <h1 class="text-4xl">Nouns Love💖</h1>
   </div>
   <Suspense>
@@ -20,15 +12,22 @@
 <script lang="ts">
 import { defineComponent, computed } from "vue";
 import { useUser, useIsSignedIn } from "@/utils/utils";
+import { useStore } from "vuex";
 
 export default defineComponent({
   setup() {
+    const store = useStore();
+
     const user = useUser();
     const isSignedIn = useIsSignedIn();
+
+    const bgColor = computed(() => store.state.bgColor);
 
     return {
       user,
       isSignedIn,
+
+      bgColor,
     };
   },
 });
