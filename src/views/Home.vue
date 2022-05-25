@@ -2,6 +2,16 @@
   <div class="home">
     <div class="justify-center items-center font-pt-root">
       <!-- Use Tailwind CSS h-40 (=10rem=160px) instead of .logo. -->
+      <div class="text-left m-8">
+        <p class="mb-2"> このサービスは、手軽に Nounish NFT を手に入れていただくために作ったオークション型のミント・サイトです。
+          オークションの方式は「ダッチオークション」と呼ばれる方式で、新たにミントしたNFTを、まずは1ETHで売り出し、
+          時間とともに徐々に値段が下げ、買い手がついたところで売買が成立し、次のNFTをミントします。</p>
+        <p> このオークションでの売り上げは、全て
+          <a href="https://nounsfes.org" class="underline">「Nouns Art Festival (NounsFes)」</a>
+        の運営(主に賞金)に当てられます。NounsFesは、オンラインの映画祭で、愛やSDGsをテーマにした短編映像を表彰するものです。
+        ここで発行されたNFTを持った方には、審査員として参加していただくことを予定しています。
+        </p>
+      </div>
       <div>
         <Animation 
           v-show="fireOn"
