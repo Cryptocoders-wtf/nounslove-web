@@ -2,9 +2,11 @@
   <div class="home">
     <div class="justify-center items-center font-pt-root">
       <!-- Use Tailwind CSS h-40 (=10rem=160px) instead of .logo. -->
-      <Animation 
-        v-show="fireOn"
-        />
+      <div>
+        <Animation 
+          v-show="fireOn"
+          />
+      </div>
       <div v-if="!hasMetaMask">
         Please install MetaMask.
       </div>
@@ -42,8 +44,8 @@
             <div v-if="buying[currentToken]">
               <span class="text-red-600 font-bold">
                 You are buying....
-                <div className="flex justify-center">
-                  <div className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"></div>
+                <div className="flex justify-center p-4">
+                  <img class="animate-spin h-4 w-8" src="@/assets/red160px.png" />  
                 </div>
               </span>
             </div>
@@ -63,7 +65,9 @@
             <div class="pt-6 font-londrina text-4xl">
               minting new one....
               <div className="flex justify-center">
-                <div className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"></div>
+                <div className="flex justify-center p-4">
+                  <img class="animate-spin h-4 w-8" src="@/assets/red160px.png" />  
+                </div>
               </div>
             </div>
           </div>
