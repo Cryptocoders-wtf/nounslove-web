@@ -1,33 +1,13 @@
 <template>
   <div class="home">
     <div class="justify-center items-center font-pt-root">
-      <!-- Use Tailwind CSS h-40 (=10rem=160px) instead of .logo. -->
-      <div class="text-left m-8">
-        <p class="mb-2"> このサービスは、手軽に Nounish NFT を手に入れていただくために作ったオークション形式のミント・サイトです。
-          「ダッチオークション」と呼ばれる方式で、新たにミントしたNFTを、まずは1ETHで売り出し、
-          時間とともに徐々に値段を下げ、買い手がついたところで、次のNFTをミントします。</p>
-        <p> このオークションでの売り上げは、全て
-          「<a href="https://nounsfes.org" class="underline">Nouns Art Festival (NounsFes)</a>」
-        の運営(主に賞金)に当てられます。NounsFesは、非営利なオンライン映画祭で、愛と平和とSDGsをテーマにした短編映像を表彰するものです。
-        ここで発行されたNFTを持った方々には、審査員として参加していただくことを予定しています。
-        </p>
-      </div>
-      <div class="text-left m-8">
-        <p class="mb-2">This is a minting service for people who want to have affordable Nounish NFTs.
-          A newly minted NFT will be priced at 1ETH initiallly, and the price will go down gradually
-          until somebody purchases it (Dutch Auction).</p>
-        <p>All the proceed from this auction will be used for 
-          <a href="https://nounsfes.org" class="underline">Nouns Art Festival (NounsFes)</a>
-          , which is a non-profit online video festival, honoring short videosm which promotes
-          love, pease and SDGs. We have a plan to create a mechanism for NFT holders to participate as judges.</p> 
-      </div>
       <div>
         <Animation 
           v-show="fireOn"
           />
       </div>
       <div v-if="!hasMetaMask">
-        Please install MetaMask.
+        <h1>{{ $t("installMetaMask") }}</h1>
       </div>
       <div v-else class="ml-0">
 
@@ -35,8 +15,7 @@
         <div v-if="currentToken == 0">
           <button @click="mintNouns" 
                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                  
-                  >Get Your Noun</button>
+                  >{{ $t("getNoun") }}</button>
         </div>
         <div v-if="nfts[currentToken]" class="sm:flex">
           
@@ -45,9 +24,9 @@
               <img :src="nfts[currentToken].data?.image" class="w-full" />
             </a>
           </div>
-          <div class="flex flex-1 flex-col bg-white sm:w-1/2 w-full" :class="bgSmColor">
+          <div class="flex flex-1 flex-col sm:w-1/2 w-full pb-4 px-4 md:bg-white" :class="bgSmColor">
             <span class="text-red-600 font-bold">
-              Now accepting bids
+              {{ $t("acceptingBits") }}
             </span>
 
             <div class="text-left font-londrina text-4xl">
@@ -57,8 +36,8 @@
               {{nfts[currentToken].data?.description}}
             </div>
 
-            <div class="font-bold">
-              Current Price: {{ currentPrice }} Eth
+            <div class="text-left font-bold mt-4 ">
+              👉 {{ $t("currentPrice") }} {{ currentPrice }} Eth
             </div>
             <div v-if="buying[currentToken]">
               <span class="text-red-600 font-bold">
@@ -73,9 +52,9 @@
             </div>
             <div v-else>
               <button @click="mintNouns" 
-                      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2"
                       
-                      >Get Your Noun</button>
+                      >{{ $t("getNoun") }}</button>
             </div>
           </div>
         </div>
@@ -92,8 +71,15 @@
           </div>
         </div>
         <!-- end of on sale -->
-      
-        <div class="mt-2">
+        <div class="font-londrina text-4xl mt-6">
+          <h1>{{ $t("aboutNounsLove") }}</h1>
+        </div>
+        <div class="text-left ml-6">
+          <Languages />
+        </div>
+        <Message />
+
+        <div class="mt-4">
           <div v-for="(tokenId, key) in nftKeys" :key="key" class="mb-2">
             <template v-if="tokenId != currentToken">
               <div class="flex">
@@ -115,7 +101,7 @@
                     {{nfts[tokenId].data?.description}}
                   </div>
                   <div class="text-left">
-                    Held by 
+                    {{ $t("heldBy") }}
                     <span v-if="accounts.includes(nfts[tokenId]?.owner)" class="text-red-600 font-bold">
                       {{(nfts[tokenId].owner||"").substr(0, 10)}}<br/>
                     </span>
@@ -124,7 +110,7 @@
                     </span>
                   </div>
                   <div class="text-left">
-                    💖Winning Price {{nfts[tokenId].price}}
+                    💖 {{ $t("winningPrice") }} {{nfts[tokenId].price}}
                   </div>
                 </div>
               </div>
@@ -147,12 +133,17 @@ const nounsTokenJson = require("./NounsTokenLocal.json");
 import { useTimerBase, currentTime, sleep } from "../utils/utils";
 
 import Animation from "./Animation.vue";
+import Languages from "@/components/Languages.vue";
+import Message from "@/components/Message.vue";
+
 import { useStore } from "vuex";
 
 export default defineComponent({
   name: "HomePage",
   components: {
     Animation,
+    Message,
+    Languages,
   },
   setup() {
     const store = useStore();
@@ -323,7 +314,8 @@ export default defineComponent({
       //currentToken.value 
     });
     const bgSmColor = computed(() => {
-      return "sm:" + bgColor.value;
+      // return "sm:" + bgColor.value;
+      return bgColor.value;
     });
     watch(bgColor, () => {
       store.commit("setBgColor", bgColor.value);

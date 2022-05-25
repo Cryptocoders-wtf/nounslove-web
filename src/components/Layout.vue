@@ -28,6 +28,7 @@ export default defineComponent({
   async setup() {
     const store = useStore();
     const user = reactive<UserData>({ user: null });
+    useI18nParam();
     
     onMounted(() => {
       auth.onAuthStateChanged((fbuser) => {

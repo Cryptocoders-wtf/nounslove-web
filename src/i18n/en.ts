@@ -4,6 +4,14 @@ const lang = {
   message: {
     hello: "hello world",
   },
+  aboutNounsLove: "About Nouns Love",
+  installMetaMask: "Please install MetaMask.",
+  acceptingBits: "Now accepting bids",
+  currentPrice: "Current Price",
+  getNoun: "Get Your Noun",
+  heldBy: "Held by",
+  winningPrice: "Winning Price",
+  
   languages,
 };
 
