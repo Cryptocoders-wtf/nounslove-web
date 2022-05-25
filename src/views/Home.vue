@@ -28,7 +28,7 @@
           </div>
           <div
             class="flex flex-1 flex-col sm:w-1/2 w-full pb-4 px-4"
-            :class="bgSmColor"
+            :class="bgColor"
           >
             <span class="text-red-600 font-bold">
               {{ $t("acceptingBits") }}
@@ -132,7 +132,7 @@
                       {{ (nfts[tokenId].owner || "").substr(0, 10) }}<br />
                     </span>
                   </div>
-                  <div class="text-left">
+                  <div class="text-left" v-if="(tokenId % 10) !== 0">
                     💖 {{ $t("winningPrice") }} {{ nfts[tokenId].price }}
                   </div>
                 </div>
@@ -148,7 +148,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, watch, computed } from "vue";
+  import { defineComponent, ref, reactive, watch, computed } from "vue";
 import { ethers } from "ethers";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -171,31 +171,31 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const loading = ref(false);
-
+    
     const nextToken = ref(0);
-    const contractAddress = "0xaC47e91215fb80462139756f43438402998E4A3a"; // desc for actual nouns for local
+    const contractAddress = "0xdFdE6B33f13de2CA1A75A6F7169f50541B14f75b"; // desc for actual nouns for local
     // const contractAddress = "0x1602155eB091F863e7e776a83e1c330c828ede19"; // desc for actual nouns // for rinkeby
-
+    
     const mintTime = ref(0);
     const nfts = ref<{ [key: string]: any }>({});
-
+    
     const maxPrice = ref(1);
     const minPrice = ref(0.005);
     const priceDelta = ref(0.015);
     const timeDelta = ref(60); // second
-
+    
     const accounts = ref<string[]>([]);
     const buying = reactive<{ [key: string]: boolean }>({});
-
-    const backgroundColor = ref("");
-
+    
     const fireOn = ref(false);
     const fire = async () => {
       fireOn.value = true;
       await sleep(7);
       fireOn.value = false;
     };
-
+    
+    const transactionHash = ref("");
+    
     const hasMetaMask = !!(window as any).ethereum;
     if (!hasMetaMask) {
       return { hasMetaMask: false, fireOn: false };
@@ -207,7 +207,7 @@ export default defineComponent({
     ethereum.on("chainChanged", (chainId: string) => {
       console.log(chainId);
     });
-
+    
     const provider = new ethers.providers.Web3Provider(
       (window as any).ethereum
     );
@@ -216,9 +216,9 @@ export default defineComponent({
       nounsTokenJson.abi,
       provider
     );
-
+    
     const now = useTimerBase(currentTime);
-
+    
     const updateNftData = async (tokenId: string) => {
       try {
         const dataURI = await contract.functions.dataURI(tokenId);
@@ -236,16 +236,16 @@ export default defineComponent({
       const price = await contract.functions.tokenPrice(tokenId);
       updateNFT(String(tokenId), "price", price[0] / 10 ** 18);
       const seed = await contract.functions.seeds(tokenId);
-
+      
       updateNFT(
         String(tokenId),
         "bgColor",
         seed.background === 0 ? "bg-nouns-grey" : "bg-nouns-beige"
       );
-
+      
       return owner[0];
     };
-
+    
     contract.on("NounCreated", (event) => {
       updateNextToken();
     });
@@ -260,33 +260,30 @@ export default defineComponent({
           fire();
         }
       }
-
+      
       buying[tokenId.toString()] = false;
     });
-
-    //provider.getTransactionReceipt("0x0792d7f2ae22399a17f8424f1424be178b49e1207101ebcf0e6497d57398dd97").then(function(transaction) {
-    //console.log(transaction);
-    //});
+    
     const updateMintTime = (newMintTime: number) => {
       if (newMintTime > mintTime.value) {
         mintTime.value = newMintTime;
       }
     };
-
+    
     const updateNextToken = async () => {
       const _minttime = await contract.functions.getMintTime();
       updateMintTime(_minttime[0].toNumber());
       const res = await contract.functions.getCurrentToken();
       nextToken.value = res[0].toString();
     };
-
+    
     const currentToken = computed(() => {
       if (nextToken.value > 0) {
         return nextToken.value - 1;
       }
       return 0;
     });
-
+    
     const updateNFT = (index: string, key: string, nft: any) => {
       const newNfts = { ...nfts.value };
       const newData = { ...nfts.value[index] } || {};
@@ -297,18 +294,18 @@ export default defineComponent({
     const initPrice = async () => {
       const priceData = await contract.functions.getPriceData();
       const [a, b, c, d, e] = priceData[0];
-
+      
       maxPrice.value = a / 10 ** 18;
       minPrice.value = b / 10 ** 18;
       priceDelta.value = c / 10 ** 18;
-
+      
       accounts.value = await provider.listAccounts();
     };
     initPrice();
-
+    
     const currentPrice = computed(() => {
       const timeDelta = 60; // second
-
+      
       const timeDiff = now.value - mintTime.value - 300;
       if (timeDiff < timeDelta) {
         return maxPrice.value;
@@ -319,7 +316,7 @@ export default defineComponent({
       }
       return Math.round((maxPrice.value - priceDiff) * 10 ** 8) / 10 ** 8;
     });
-
+    
     watch(currentToken, async () => {
       const arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
       await Promise.all(
@@ -332,7 +329,7 @@ export default defineComponent({
         })
       );
     });
-
+    
     const bgColor = computed(() => {
       const nft = nfts.value[currentToken.value];
       if (nft) {
@@ -341,25 +338,21 @@ export default defineComponent({
       return "bg-nouns-gray";
       //currentToken.value
     });
-    const bgSmColor = computed(() => {
-      // return "sm:" + bgColor.value;
-      return bgColor.value;
-    });
     watch(bgColor, () => {
       store.commit("setBgColor", bgColor.value);
     });
     updateNextToken();
-
+    
     const mintNouns = async () => {
       await provider.send("eth_requestAccounts", []);
-
+      
       const signer = provider.getSigner();
       const contractWithSigner = new ethers.Contract(
         contractAddress,
         nounsTokenJson.abi,
         signer
       );
-
+      
       loading.value = true;
       try {
         if (currentToken.value == 0) {
@@ -373,7 +366,8 @@ export default defineComponent({
             currentToken.value,
             options
           );
-          console.log(res.hash);
+          
+          transactionHash.value = res.hash;
         }
         await updateNextToken();
       } catch (e) {
@@ -382,7 +376,29 @@ export default defineComponent({
       }
       loading.value = false;
     };
-
+    
+    const watchTransaction = async (hash: string) => {
+      let loop = true;
+      
+      while(loop) {
+        await sleep(5);
+        const receipt = await provider.getTransactionReceipt(hash);
+        if (receipt) {
+          loop = false;
+          if (receipt.status == 0) {
+            buying[currentToken.value] = false;
+            alert("sorry. Your request is failed. Someone has won or the gas price is low.");
+          }
+        }
+        console.log("loop");
+      }
+    };
+    watch(transactionHash, () => {
+      if (transactionHash.value) {
+        watchTransaction(transactionHash.value);
+      }
+    });
+    
     const nftKeys = computed(() => {
       return Object.keys(nfts.value).sort((a, b) => {
         return Number(a) > Number(b) ? -1 : 1;
@@ -407,7 +423,7 @@ export default defineComponent({
       fireOn,
       fire,
       bgColor,
-      bgSmColor,
+
     };
   },
 });
