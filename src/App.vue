@@ -1,6 +1,5 @@
 <template>
-  <div id="nav">
-  </div>
+  <div id="nav"></div>
   <div class="font-londrina" :class="bgColor">
     <h1 class="text-4xl">Nouns Love💖</h1>
   </div>
@@ -34,9 +33,9 @@ export default defineComponent({
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css?family=Londrina+Solid&display=swap');
-@import url('https://fonts.cdnfonts.com/css/pt-root-ui');
-@import url('https://fonts.googleapis.com/css2?family=Yusei+Magic&display=swap');
+@import url("https://fonts.googleapis.com/css?family=Londrina+Solid&display=swap");
+@import url("https://fonts.cdnfonts.com/css/pt-root-ui");
+@import url("https://fonts.googleapis.com/css2?family=Yusei+Magic&display=swap");
 
 #app {
   /* font-family: Avenir, Helvetica, Arial, sans-serif;

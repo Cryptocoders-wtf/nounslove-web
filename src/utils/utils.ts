@@ -35,5 +35,5 @@ export const useTimerBase = (getCurrentTime: () => any, sleepTime?: number) => {
 };
 
 export const currentTime = () => {
-  return Math.floor((new Date()).getTime()/1000);
+  return Math.floor(new Date().getTime() / 1000);
 };

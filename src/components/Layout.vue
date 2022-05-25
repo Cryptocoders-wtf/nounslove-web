@@ -16,20 +16,18 @@ import { User } from "firebase/auth";
 
 import { useI18nParam } from "@/i18n/utils";
 
-
 interface UserData {
   user: User | null;
 }
 
 export default defineComponent({
   name: "AppLayout",
-  components: {
-  },
+  components: {},
   async setup() {
     const store = useStore();
     const user = reactive<UserData>({ user: null });
     useI18nParam();
-    
+
     onMounted(() => {
       auth.onAuthStateChanged((fbuser) => {
         if (fbuser) {

@@ -11,7 +11,7 @@ const lang = {
   getNoun: "Get Your Nounish",
   heldBy: "Held by",
   winningPrice: "Winning Price",
-  
+
   languages,
 };
 

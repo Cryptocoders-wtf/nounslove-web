@@ -21,10 +21,10 @@ const routeChildren: Array<RouteRecordRaw> = [
     path: "account",
     component: Account,
   },
-//  {
-//    path: "test",
-//    component: Test,
-//  },
+  //  {
+  //    path: "test",
+  //    component: Test,
+  //  },
 ];
 
 const routes: Array<RouteRecordRaw> = [

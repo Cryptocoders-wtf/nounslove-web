@@ -4,7 +4,7 @@
     :particlesInit="particlesInit"
     :particlesLoaded="particlesLoaded"
     :options="options"
-    />
+  />
 </template>
 
 <script lang="ts">
@@ -16,13 +16,8 @@ import { loadSeaAnemonePreset } from "tsparticles-preset-sea-anemone";
 import { loadConfettiPreset } from "tsparticles-preset-confetti";
 
 export default defineComponent({
-  setup () {
-    const presets = [
-      "fireworks",
-      "fountain",
-      "seaAnemone",
-      "confetti",
-    ];
+  setup() {
+    const presets = ["fireworks", "fountain", "seaAnemone", "confetti"];
     const seed = Math.floor(Math.random() * presets.length);
 
     return {
@@ -38,8 +33,7 @@ export default defineComponent({
       options: {
         preset: presets[seed],
       },
-
-    }
+    };
   },
 });
 </script>
