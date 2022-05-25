@@ -11,6 +11,12 @@
       <div v-else class="ml-0">
 
         <!-- on sale noun -->
+        <div v-if="currentToken == 0">
+          <button @click="mintNouns" 
+                  class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  
+                  >Get Your Noun</button>
+        </div>
         <div v-if="nfts[currentToken]" class="sm:flex">
           
           <div class="relative sm:w-1/2 w-full" :class="bgColor">
@@ -130,8 +136,8 @@ export default defineComponent({
     const loading = ref(false);
      
     const nextToken = ref(0);
-    const contractAddress = "0x1c9fD50dF7a4f066884b58A05D91e4b55005876A"; // desc for actual nouns for local
-    // const contractAddress = "0xbe41F43c0d2cCbfce561429F18d3473DFa17eBAd"; // desc for actual nouns // for rinkeby
+    // const contractAddress = "0x1c9fD50dF7a4f066884b58A05D91e4b55005876A"; // desc for actual nouns for local
+    const contractAddress = "0x1602155eB091F863e7e776a83e1c330c828ede19"; // desc for actual nouns // for rinkeby
     
     const mintTime = ref(0);
     const nfts = ref<{[key: string]: any}>({});
