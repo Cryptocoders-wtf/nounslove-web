@@ -148,19 +148,23 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref, reactive, watch, computed } from "vue";
+import { defineComponent, ref, reactive, watch, computed } from "vue";
+import { useStore } from "vuex";
+import { useI18n } from "vue-i18n";
+
 import { ethers } from "ethers";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const nounsTokenJson = require("./NounsTokenLocal.json");
+
+import { ethereumConfig } from "../config/project";
 import { useTimerBase, currentTime, sleep } from "../utils/utils";
 
 import Animation from "./Animation.vue";
 import Languages from "@/components/Languages.vue";
 import Message from "@/components/Message.vue";
 
-import { useStore } from "vuex";
-import { useI18n } from "vue-i18n";
+
 
 export default defineComponent({
   name: "HomePage",
@@ -175,7 +179,9 @@ export default defineComponent({
     const loading = ref(false);
     
     const nextToken = ref(0);
-    const contractAddress = "0xdFdE6B33f13de2CA1A75A6F7169f50541B14f75b"; // desc for actual nouns for local
+    const { contractAddress } = ethereumConfig;
+
+    // "0xdFdE6B33f13de2CA1A75A6F7169f50541B14f75b"; // desc for actual nouns for local
     // const contractAddress = "0x1602155eB091F863e7e776a83e1c330c828ede19"; // desc for actual nouns // for rinkeby
     
     const mintTime = ref(0);
@@ -300,19 +306,19 @@ export default defineComponent({
       maxPrice.value = a / 10 ** 18;
       minPrice.value = b / 10 ** 18;
       priceDelta.value = c / 10 ** 18;
+      timeDelta.value = d.value;
       
       accounts.value = await provider.listAccounts();
     };
     initPrice();
     
     const currentPrice = computed(() => {
-      const timeDelta = 60; // second
       
       const timeDiff = now.value - mintTime.value - 300;
-      if (timeDiff < timeDelta) {
+      if (timeDiff < timeDelta.value) {
         return maxPrice.value;
       }
-      const priceDiff = Math.round(timeDiff / timeDelta) * priceDelta.value;
+      const priceDiff = Math.round(timeDiff / timeDelta.value) * priceDelta.value;
       if (priceDiff >= maxPrice.value - minPrice.value) {
         return minPrice.value;
       }
@@ -338,7 +344,6 @@ export default defineComponent({
         return nft.bgColor;
       }
       return "bg-nouns-gray";
-      //currentToken.value
     });
     watch(bgColor, () => {
       store.commit("setBgColor", bgColor.value);
