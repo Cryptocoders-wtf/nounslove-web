@@ -159,7 +159,7 @@ const nounsTokenJson = require("./NounsTokenLocal.json");
 
 import { ethereumConfig } from "../config/project";
 import { sleep } from "../utils/utils";
-import { usePrice } from "./HomeUtils";
+import { usePrice, useWatchTransaction, useFire, useCurrentAndNextToken } from "./HomeUtils";
 
 import Animation from "./Animation.vue";
 import Languages from "@/components/Languages.vue";
@@ -179,26 +179,13 @@ export default defineComponent({
     const i18n = useI18n();
     const loading = ref(false);
     
-    const nextToken = ref(0);
-    const { contractAddress } = ethereumConfig;
-
-    // "0xdFdE6B33f13de2CA1A75A6F7169f50541B14f75b"; // desc for actual nouns for local
-    // const contractAddress = "0x1602155eB091F863e7e776a83e1c330c828ede19"; // desc for actual nouns // for rinkeby
-    
     const nfts = ref<{ [key: string]: any }>({});
     
     const accounts = ref<string[]>([]);
     const buying = reactive<{ [key: string]: boolean }>({});
     
-    const fireOn = ref(false);
-    const fire = async () => {
-      fireOn.value = true;
-      await sleep(7);
-      fireOn.value = false;
-    };
-    
-    const transactionHash = ref("");
-    
+    const { contractAddress } = ethereumConfig;
+
     const hasMetaMask = !!(window as any).ethereum;
     if (!hasMetaMask) {
       return { hasMetaMask: false, fireOn: false };
@@ -221,6 +208,15 @@ export default defineComponent({
     );
     
     const { currentPrice, mintTime } = usePrice(contract);
+    const { currentToken, nextToken } = useCurrentAndNextToken();
+    const txWatchCallback = (status: number) => {
+      if (status == 0) {
+        buying[currentToken.value] = false;
+        alert(i18n.t("sorryLowGasPrice"));
+      }
+    };
+    const { transactionHash } = useWatchTransaction(provider, txWatchCallback);
+    const { fire, fireOn } = useFire();
     
     const updateNftData = async (tokenId: string) => {
       try {
@@ -234,24 +230,24 @@ export default defineComponent({
       }
     };
     const updateOwnerData = async (tokenId: string) => {
-      const owner = await contract.functions.ownerOf(tokenId);
-      updateNFT(String(tokenId), "owner", owner[0]);
-      const price = await contract.functions.tokenPrice(tokenId);
-      updateNFT(String(tokenId), "price", price[0] / 10 ** 18);
-      const seed = await contract.functions.seeds(tokenId);
-      
-      updateNFT(
-        String(tokenId),
-        "bgColor",
-        seed.background === 0 ? "bg-nouns-grey" : "bg-nouns-beige"
-      );
-      
-      return owner[0];
+      contract.functions.ownerOf(tokenId).then(owner => {
+        updateNFT(String(tokenId), "owner", owner[0]);
+      });
+      contract.functions.tokenPrice(tokenId).then(price => {
+        updateNFT(String(tokenId), "price", price[0] / 10 ** 18);
+      });
+      contract.functions.seeds(tokenId).then(seed => {
+        updateNFT(
+          String(tokenId),
+          "bgColor",
+          seed.background === 0 ? "bg-nouns-grey" : "bg-nouns-beige"
+        );
+      })
     };
 
-    (async () => {
-      accounts.value = await provider.listAccounts();
-    })();
+    provider.listAccounts().then(res => {
+      accounts.value = res;
+    });
     
     contract.on("NounCreated", (event) => {
       updateNextToken();
@@ -263,7 +259,6 @@ export default defineComponent({
       updateNFT(tokenId.toString(), "owner", owner);
       if (buying[tokenId.toString()]) {
         if (owner == accounts.value[0]) {
-          // alert("you won");
           fire();
         }
       }
@@ -278,18 +273,13 @@ export default defineComponent({
     };
     
     const updateNextToken = async () => {
-      const _minttime = await contract.functions.getMintTime();
-      updateMintTime(_minttime[0].toNumber());
-      const res = await contract.functions.getCurrentToken();
-      nextToken.value = res[0].toString();
+      contract.functions.getMintTime().then(_minttime => {
+        updateMintTime(_minttime[0].toNumber());
+      });
+      contract.functions.getCurrentToken().then(res => {
+        nextToken.value = res[0].toString();
+      });
     };
-    
-    const currentToken = computed(() => {
-      if (nextToken.value > 0) {
-        return nextToken.value - 1;
-      }
-      return 0;
-    });
     
     const updateNFT = (index: string, key: string, nft: any) => {
       const newNfts = { ...nfts.value };
@@ -300,9 +290,8 @@ export default defineComponent({
     };
     
     watch(currentToken, async () => {
-      const arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
       await Promise.all(
-        arr.map(async (i: number) => {
+        Array.from(Array.from(new Array(10)).keys()).map(async (i: number) => {
           const index = currentToken.value - i;
           if (index >= 0 && !nfts.value[String(index)]) {
             updateNftData(String(index));
@@ -322,6 +311,7 @@ export default defineComponent({
     watch(bgColor, () => {
       store.commit("setBgColor", bgColor.value);
     });
+
     updateNextToken();
     
     const mintNouns = async () => {
@@ -336,21 +326,15 @@ export default defineComponent({
       
       loading.value = true;
       try {
-        if (currentToken.value == 0) {
-          await contractWithSigner.functions.mint();
-        } else {
-          buying[currentToken.value] = true;
-          const options = {
+        buying[currentToken.value] = true;
+        const res = await contractWithSigner.functions.buy(
+          currentToken.value,
+          {
             value: ethers.utils.parseEther(String(currentPrice.value)),
-          };
-          const res = await contractWithSigner.functions.buy(
-            currentToken.value,
-            options
-          );
-          
-          transactionHash.value = res.hash;
-        }
-        await updateNextToken();
+          }
+        );
+        transactionHash.value = res.hash;
+        updateNextToken();
       } catch (e) {
         console.log(e);
         buying[currentToken.value] = false;
@@ -358,28 +342,6 @@ export default defineComponent({
       }
       loading.value = false;
     };
-    
-    const watchTransaction = async (hash: string) => {
-      let loop = true;
-      
-      while(loop) {
-        await sleep(5);
-        const receipt = await provider.getTransactionReceipt(hash);
-        if (receipt) {
-          loop = false;
-          if (receipt.status == 0) {
-            buying[currentToken.value] = false;
-            alert(i18n.t("sorryLowGasPrice"));
-          }
-        }
-        console.log("loop");
-      }
-    };
-    watch(transactionHash, () => {
-      if (transactionHash.value) {
-        watchTransaction(transactionHash.value);
-      }
-    });
     
     const nftKeys = computed(() => {
       return Object.keys(nfts.value).sort((a, b) => {
