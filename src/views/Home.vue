@@ -158,7 +158,8 @@ import { ethers } from "ethers";
 const nounsTokenJson = require("./NounsTokenLocal.json");
 
 import { ethereumConfig } from "../config/project";
-import { useTimerBase, currentTime, sleep } from "../utils/utils";
+import { sleep } from "../utils/utils";
+import { usePrice } from "./HomeUtils";
 
 import Animation from "./Animation.vue";
 import Languages from "@/components/Languages.vue";
@@ -184,13 +185,7 @@ export default defineComponent({
     // "0xdFdE6B33f13de2CA1A75A6F7169f50541B14f75b"; // desc for actual nouns for local
     // const contractAddress = "0x1602155eB091F863e7e776a83e1c330c828ede19"; // desc for actual nouns // for rinkeby
     
-    const mintTime = ref(0);
     const nfts = ref<{ [key: string]: any }>({});
-    
-    const maxPrice = ref(1);
-    const minPrice = ref(0.005);
-    const priceDelta = ref(0.015);
-    const timeDelta = ref(60); // second
     
     const accounts = ref<string[]>([]);
     const buying = reactive<{ [key: string]: boolean }>({});
@@ -225,7 +220,7 @@ export default defineComponent({
       provider
     );
     
-    const now = useTimerBase(currentTime);
+    const { currentPrice, mintTime } = usePrice(contract);
     
     const updateNftData = async (tokenId: string) => {
       try {
@@ -253,6 +248,10 @@ export default defineComponent({
       
       return owner[0];
     };
+
+    (async () => {
+      accounts.value = await provider.listAccounts();
+    })();
     
     contract.on("NounCreated", (event) => {
       updateNextToken();
@@ -299,31 +298,6 @@ export default defineComponent({
       newNfts[index] = newData;
       nfts.value = newNfts;
     };
-    const initPrice = async () => {
-      const priceData = await contract.functions.getPriceData();
-      const [a, b, c, d, e] = priceData[0];
-      
-      maxPrice.value = a / 10 ** 18;
-      minPrice.value = b / 10 ** 18;
-      priceDelta.value = c / 10 ** 18;
-      timeDelta.value = d.value;
-      
-      accounts.value = await provider.listAccounts();
-    };
-    initPrice();
-    
-    const currentPrice = computed(() => {
-      
-      const timeDiff = now.value - mintTime.value - 300;
-      if (timeDiff < timeDelta.value) {
-        return maxPrice.value;
-      }
-      const priceDiff = Math.round(timeDiff / timeDelta.value) * priceDelta.value;
-      if (priceDiff >= maxPrice.value - minPrice.value) {
-        return minPrice.value;
-      }
-      return Math.round((maxPrice.value - priceDiff) * 10 ** 8) / 10 ** 8;
-    });
     
     watch(currentToken, async () => {
       const arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
