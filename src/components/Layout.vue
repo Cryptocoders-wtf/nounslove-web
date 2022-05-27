@@ -5,6 +5,7 @@
     </div>
     <div v-else-if="!isValidChain">
       <h1>Invalid Netword</h1>
+      You need to connect to {{networdName}}
     </div>
     <template v-else>
       <template v-if="contract && provider">
@@ -47,7 +48,7 @@ export default defineComponent({
       return { hasMetaMask: false };
     }
 
-    const { contractAddress } = ethereumConfig;
+    const { contractAddress, networdName } = ethereumConfig;
 
     const switchNetwork = async (chainId: string) => {
       console.log(chainId);
@@ -106,6 +107,7 @@ export default defineComponent({
     });
     return {
       hasMetaMask,
+      networdName,
       isValidChain,
       provider,
       contract,
