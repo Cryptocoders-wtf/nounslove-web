@@ -138,7 +138,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, watch, computed } from "vue";
+import { defineComponent, ref, reactive, watch, computed, PropType } from "vue";
 import { useStore } from "vuex";
 import { useI18n } from "vue-i18n";
 
@@ -176,7 +176,7 @@ export default defineComponent({
       required: true,
     },
     accounts: {
-      type: Array,
+      type: Array as PropType<Array<string>>,
       required: true,
     },
   },
