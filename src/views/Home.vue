@@ -159,6 +159,18 @@ import Animation from "./Animation.vue";
 import Languages from "@/components/Languages.vue";
 import Message from "@/components/Message.vue";
 
+interface NFT {
+  name: string;
+  description: string;
+  image: string;
+}
+interface NFTData {
+  data: NFT;
+  price: number;
+  owner: string;
+  bgColor: string;
+}
+
 export default defineComponent({
   name: "HomePage",
   components: {
@@ -185,7 +197,7 @@ export default defineComponent({
     const i18n = useI18n();
     const loading = ref(false);
 
-    const nfts = ref<{ [key: string]: any }>({});
+    const nfts = ref<{ [key: string]: NFTData }>({});
 
     const buying = reactive<{ [key: string]: boolean }>({});
 
@@ -213,7 +225,11 @@ export default defineComponent({
         );
         updateNFT(String(tokenId), "data", data);
       } catch (e) {
-        updateNFT(String(tokenId), "data", { name: "broken" });
+        updateNFT(String(tokenId), "data", {
+          name: "broken",
+          image: "",
+          description: "",
+        });
       }
     };
     const updateOwnerData = async (tokenId: string) => {
@@ -269,10 +285,14 @@ export default defineComponent({
       });
     };
 
-    const updateNFT = (index: string, key: string, nft: any) => {
+    const updateNFT = (
+      index: string,
+      key: string,
+      nft: NFT | number | string
+    ) => {
       const newNfts = { ...nfts.value };
       const newData = { ...nfts.value[index] } || {};
-      newData[key] = nft;
+      newData[key as keyof NFTData] = nft as never;
       newNfts[index] = newData;
       nfts.value = newNfts;
     };
