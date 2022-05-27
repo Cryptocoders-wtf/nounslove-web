@@ -103,10 +103,7 @@
                 </div>
                 <div class="flex-1">
                   <div>
-                    <span
-                      v-if="owners[tokenId]"
-                      class="text-red-600 font-bold"
-                    >
+                    <span v-if="owners[tokenId]" class="text-red-600 font-bold">
                       💖You wons!!
                     </span>
                   </div>
@@ -118,10 +115,7 @@
                   </div>
                   <div class="text-left">
                     {{ $t("heldBy") }}
-                    <span
-                      v-if="owners[tokenId]"
-                      class="text-red-600 font-bold"
-                    >
+                    <span v-if="owners[tokenId]" class="text-red-600 font-bold">
                       {{ (nfts[tokenId].owner || "").substr(0, 10) }}<br />
                     </span>
                     <span v-else>
@@ -150,8 +144,7 @@ import { useI18n } from "vue-i18n";
 
 import { ethers } from "ethers";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const nounsTokenJson = require("../abi/NounsToken.json");
+import nounsTokenJson from "@/abi/NounsToken";
 
 import { ethereumConfig } from "@/config/project";
 import { sleep } from "@/utils/utils";
@@ -342,22 +335,25 @@ export default defineComponent({
     });
 
     const owners = computed(() => {
-      return nftKeys.value.reduce((ret: {[key: string]: boolean}, key: string) => {
-        ret[key] = props.accounts.includes(nfts.value[key]?.owner)
-        return ret;
-      }, {});
+      return nftKeys.value.reduce(
+        (ret: { [key: string]: boolean }, key: string) => {
+          ret[key] = props.accounts.includes(nfts.value[key]?.owner);
+          return ret;
+        },
+        {}
+      );
     });
-    
+
     return {
       loading,
       mintNouns,
       contractAddress,
       openseaUrl,
-      
+
       nfts,
       nftKeys,
       owners,
-      
+
       currentPrice,
       currentToken,
 

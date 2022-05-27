@@ -13,10 +13,11 @@ const lang = {
   winningPrice: "Winning Price",
   sorryLowPrice: "Sorry. Someone has won or the bid price is low.",
   sorryLowGasPrice:
-  "Sorry. Your request is failed. Someone has won or the gas price is low.",
+    "Sorry. Your request is failed. Someone has won or the gas price is low.",
   invalidNetwork: "Invalid Netword",
   youNeetNet: "You need to connect to {networdName}",
-  notFoundMessage: "404: This is not the person, place, or thing you're looking for...",
+  notFoundMessage:
+    "404: This is not the person, place, or thing you're looking for...",
   languages,
 };
 

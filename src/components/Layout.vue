@@ -5,7 +5,7 @@
     </div>
     <div v-else-if="!isValidChain">
       <h1>{{ $t("invalidNetwork") }}</h1>
-      {{ $t("youNeetNet", {networdName}) }}
+      {{ $t("youNeetNet", { networdName }) }}
       <div class="text-left ml-6">
         <Languages />
       </div>
@@ -31,8 +31,7 @@ import { useI18nParam } from "@/i18n/utils";
 
 import Languages from "@/components/Languages.vue";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const nounsTokenJson = require("../abi/NounsToken.json");
+import nounsTokenJson from "@/abi/NounsToken";
 
 import { ethereumConfig } from "@/config/project";
 
@@ -70,7 +69,7 @@ export default defineComponent({
     };
 
     ethereum.on("accountsChanged", (_accounts: any) => {
-      console.log("accountsChanged")
+      console.log("accountsChanged");
       accounts.value = _accounts;
     });
     ethereum.on("chainChanged", (_chainId: string) => {
@@ -88,13 +87,13 @@ export default defineComponent({
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const network = await provider.getNetwork();
       chainId.value = ethers.utils.hexlify(network.chainId);
-    }
+    };
     initChainId();
     switchNetwork(ethereumConfig.chainId);
 
     const isValidChain = computed(() => {
       console.log(chainId.value, ethereumConfig.chainId);
-      return parseInt(chainId.value) === parseInt(ethereumConfig.chainId)
+      return parseInt(chainId.value) === parseInt(ethereumConfig.chainId);
     });
 
     const provider = computed(() => {
