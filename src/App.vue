@@ -1,7 +1,11 @@
 <template>
   <div id="nav"></div>
   <div class="font-londrina" :class="bgColor">
-    <h1 class="text-4xl">Nouns Love💖</h1>
+    <h1 class="text-4xl">
+      <router-link to="/">
+        Nouns Love💖
+      </router-link>
+    </h1>
   </div>
   <Suspense>
     <router-view />

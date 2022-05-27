@@ -13,19 +13,10 @@
       {{ $t("notFoundMessage") }}
     </div>
   </div>
-  <div class="text-left ml-6">
-    <Languages />
-  </div>
 
 </div>
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import Languages from "@/components/Languages.vue";
-export default defineComponent({
-  components: {
-    Languages,
-  },
-
-});
+export default defineComponent({});
 </script>
