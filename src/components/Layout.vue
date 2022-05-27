@@ -63,6 +63,7 @@ export default defineComponent({
     };
 
     ethereum.on("accountsChanged", (_accounts: any) => {
+      console.log("accountsChanged")
       accounts.value = _accounts;
     });
     ethereum.on("chainChanged", (_chainId: string) => {
@@ -78,7 +79,7 @@ export default defineComponent({
     switchNetwork(ethereumConfig.chainId);
 
     const isValidChain = computed(() => {
-      // console.log(chainId.value, ethereumConfig.chainId);
+      console.log(chainId.value, ethereumConfig.chainId);
       return chainId.value === ethereumConfig.chainId;
     });
 

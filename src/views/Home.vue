@@ -104,7 +104,7 @@
                 <div class="flex-1">
                   <div>
                     <span
-                      v-if="accounts.includes(nfts[tokenId]?.owner)"
+                      v-if="owners[tokenId]"
                       class="text-red-600 font-bold"
                     >
                       💖You wons!!
@@ -119,7 +119,7 @@
                   <div class="text-left">
                     {{ $t("heldBy") }}
                     <span
-                      v-if="accounts.includes(nfts[tokenId]?.owner)"
+                      v-if="owners[tokenId]"
                       class="text-red-600 font-bold"
                     >
                       {{ (nfts[tokenId].owner || "").substr(0, 10) }}<br />
@@ -341,6 +341,13 @@ export default defineComponent({
       });
     });
 
+    const owners = computed(() => {
+      return nftKeys.value.reduce((ret: {[key: string]: boolean}, key: string) => {
+        ret[key] = props.accounts.includes(nfts.value[key]?.owner)
+        return ret;
+      }, {});
+    });
+    
     return {
       loading,
       mintNouns,
@@ -348,7 +355,8 @@ export default defineComponent({
 
       nfts,
       nftKeys,
-
+      owners,
+      
       currentPrice,
       currentToken,
 
