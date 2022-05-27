@@ -2,7 +2,7 @@ import { ref, computed, watch, Ref } from "vue";
 
 import { ethers } from "ethers";
 
-import { useTimerBase, currentTime} from "../utils/utils";
+import { useTimerBase, currentTime } from "../utils/utils";
 import { sleep } from "../utils/utils";
 
 export const usePrice = (contract: ethers.Contract) => {
@@ -12,7 +12,7 @@ export const usePrice = (contract: ethers.Contract) => {
   const minPrice = ref(0.005);
   const priceDelta = ref(0.015);
   const timeDelta = ref(60); // second
-  
+
   const now = useTimerBase(currentTime);
 
   const initPrice = async (_contract: ethers.Contract) => {
@@ -22,9 +22,8 @@ export const usePrice = (contract: ethers.Contract) => {
     minPrice.value = b / 10 ** 18;
     priceDelta.value = c / 10 ** 18;
     timeDelta.value = d.toNumber();
-    
   };
-    
+
   const currentPrice = computed(() => {
     const timeDiff = now.value - mintTime.value - 300;
     if (timeDiff < timeDelta.value) {
@@ -45,13 +44,16 @@ export const usePrice = (contract: ethers.Contract) => {
   };
 };
 
-export const useWatchTransaction = (provider: any, callback: (status: number) => void) => {
+export const useWatchTransaction = (
+  provider: any,
+  callback: (status: number) => void
+) => {
   const transactionHash = ref("");
 
   const watchTransaction = async (hash: string) => {
     let loop = true;
-      
-    while(loop) {
+
+    while (loop) {
       await sleep(5);
       const receipt = await provider.getTransactionReceipt(hash);
       if (receipt) {
@@ -68,7 +70,7 @@ export const useWatchTransaction = (provider: any, callback: (status: number) =>
   });
   return {
     transactionHash,
-  }
+  };
 };
 
 export const useFire = () => {
@@ -79,7 +81,7 @@ export const useFire = () => {
     fireOn.value = false;
   };
   return { fire, fireOn };
-}
+};
 
 export const useCurrentAndNextToken = () => {
   const nextToken = ref(0);
@@ -89,9 +91,9 @@ export const useCurrentAndNextToken = () => {
     }
     return 0;
   });
-  
+
   return {
     nextToken,
-    currentToken
+    currentToken,
   };
 };

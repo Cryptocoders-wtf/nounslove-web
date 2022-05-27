@@ -12,7 +12,7 @@
           :contract="contract"
           :provider="provider"
           :accounts="accounts"
-          />
+        />
       </template>
     </template>
   </div>
@@ -37,26 +37,30 @@ export default defineComponent({
     const store = useStore();
 
     useI18nParam();
- 
+
     const chainId = ref("");
     const accounts = ref<string[]>([]);
 
     const ethereum = window.ethereum;
-    const hasMetaMask = !!ethereum
+    const hasMetaMask = !!ethereum;
     if (!hasMetaMask) {
       return { hasMetaMask: false };
     }
-    
+
     const { contractAddress } = ethereumConfig;
 
     const switchNetwork = async (chainId: string) => {
+      console.log(chainId);
       try {
-        await ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId }] });
-      } catch(e) {
+        await ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId }],
+        });
+      } catch (e) {
         console.log(e);
       }
     };
-    
+
     ethereum.on("accountsChanged", (_accounts: any) => {
       accounts.value = _accounts;
     });
@@ -70,21 +74,22 @@ export default defineComponent({
       chainId.value = "";
     });
 
-    switchNetwork(ethereumConfig.chainId)
+    switchNetwork(ethereumConfig.chainId);
 
     const isValidChain = computed(() => {
+      // console.log(chainId.value, ethereumConfig.chainId);
       return chainId.value === ethereumConfig.chainId;
     });
-    
+
     const provider = computed(() => {
       if (isValidChain.value) {
         return new ethers.providers.Web3Provider(window.ethereum);
       }
       return null;
     });
-    watch((provider), (v) => {
+    watch(provider, (v) => {
       if (v) {
-        v.listAccounts().then(res => {
+        v.listAccounts().then((res) => {
           accounts.value = res;
         });
       }
@@ -94,7 +99,7 @@ export default defineComponent({
         return new ethers.Contract(
           contractAddress,
           nounsTokenJson.abi,
-          provider.value,
+          provider.value
         );
       }
       return null;
