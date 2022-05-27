@@ -11,6 +11,6 @@ export const firebaseConfig = {
 };
 
 export const ethereumConfig = {
-  chainId: '0x04', // local
+  chainId: '0x539', // local
   contractAddress: "0xdFdE6B33f13de2CA1A75A6F7169f50541B14f75b", 
 };

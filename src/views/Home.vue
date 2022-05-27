@@ -4,10 +4,7 @@
       <div class="w-full h-full">
         <Animation v-show="fireOn" />
       </div>
-      <div v-if="!hasMetaMask">
-        <h1>{{ $t("installMetaMask") }}</h1>
-      </div>
-      <div v-else class="ml-0">
+      <div class="ml-0">
         <!-- on sale noun -->
         <div v-if="currentToken == 0">
           <button
@@ -174,40 +171,33 @@ export default defineComponent({
     Message,
     Languages,
   },
-  setup() {
+  props: {
+    contract: {
+      type: ethers.Contract,
+      required: true,
+    },
+    provider: {
+      type: ethers.providers.Web3Provider,
+      required: true,
+    },
+    accounts: {
+      type: Array,
+      required: true,
+    },
+    
+  },
+  setup(props) {
     const store = useStore();
     const i18n = useI18n();
     const loading = ref(false);
     
     const nfts = ref<{ [key: string]: any }>({});
     
-    const accounts = ref<string[]>([]);
     const buying = reactive<{ [key: string]: boolean }>({});
     
     const { contractAddress } = ethereumConfig;
 
-    const hasMetaMask = !!(window as any).ethereum;
-    if (!hasMetaMask) {
-      return { hasMetaMask: false, fireOn: false };
-    }
-    const ethereum = (window as any).ethereum;
-    ethereum.on("accountsChanged", (accounts: any) => {
-      console.log("AA");
-    });
-    ethereum.on("chainChanged", (chainId: string) => {
-      console.log(chainId);
-    });
-    
-    const provider = new ethers.providers.Web3Provider(
-      (window as any).ethereum
-    );
-    const contract = new ethers.Contract(
-      contractAddress,
-      nounsTokenJson.abi,
-      provider
-    );
-    
-    const { currentPrice, mintTime } = usePrice(contract);
+    const { currentPrice, mintTime } = usePrice(props.contract);
     const { currentToken, nextToken } = useCurrentAndNextToken();
     const txWatchCallback = (status: number) => {
       if (status == 0) {
@@ -215,12 +205,12 @@ export default defineComponent({
         alert(i18n.t("sorryLowGasPrice"));
       }
     };
-    const { transactionHash } = useWatchTransaction(provider, txWatchCallback);
+    const { transactionHash } = useWatchTransaction(props.provider, txWatchCallback);
     const { fire, fireOn } = useFire();
     
     const updateNftData = async (tokenId: string) => {
       try {
-        const dataURI = await contract.functions.dataURI(tokenId);
+        const dataURI = await props.contract.functions.dataURI(tokenId);
         const data = JSON.parse(
           Buffer.from(dataURI[0].substring(29), "base64").toString("ascii")
         );
@@ -230,13 +220,13 @@ export default defineComponent({
       }
     };
     const updateOwnerData = async (tokenId: string) => {
-      contract.functions.ownerOf(tokenId).then(owner => {
+      props.contract.functions.ownerOf(tokenId).then(owner => {
         updateNFT(String(tokenId), "owner", owner[0]);
       });
-      contract.functions.tokenPrice(tokenId).then(price => {
+      props.contract.functions.tokenPrice(tokenId).then(price => {
         updateNFT(String(tokenId), "price", price[0] / 10 ** 18);
       });
-      contract.functions.seeds(tokenId).then(seed => {
+      props.contract.functions.seeds(tokenId).then(seed => {
         updateNFT(
           String(tokenId),
           "bgColor",
@@ -245,26 +235,27 @@ export default defineComponent({
       })
     };
 
-    provider.listAccounts().then(res => {
-      accounts.value = res;
-    });
-    
-    contract.on("NounCreated", (event) => {
-      updateNextToken();
-    });
-    contract.on("MintTimeUpdated", (event) => {
-      updateMintTime(event.toNumber());
-    });
-    contract.on("NounBought", (tokenId, owner) => {
-      updateNFT(tokenId.toString(), "owner", owner);
-      if (buying[tokenId.toString()]) {
-        if (owner == accounts.value[0]) {
-          fire();
+    const initEvent = () => {
+      props.contract.removeAllListeners();
+      props.contract.on("NounCreated", (event) => {
+        console.log("NounCreated");
+        updateNextToken();
+      });
+      props.contract.on("MintTimeUpdated", (event) => {
+        updateMintTime(event.toNumber());
+      });
+      props.contract.on("NounBought", (tokenId, owner) => {
+        updateNFT(tokenId.toString(), "owner", owner);
+        if (buying[tokenId.toString()]) {
+          if (owner == props.accounts[0]) {
+            fire();
+          }
         }
-      }
-      
-      buying[tokenId.toString()] = false;
-    });
+        
+        buying[tokenId.toString()] = false;
+      });
+    };
+    initEvent();
     
     const updateMintTime = (newMintTime: number) => {
       if (newMintTime > mintTime.value) {
@@ -273,10 +264,10 @@ export default defineComponent({
     };
     
     const updateNextToken = async () => {
-      contract.functions.getMintTime().then(_minttime => {
+      props.contract.functions.getMintTime().then(_minttime => {
         updateMintTime(_minttime[0].toNumber());
       });
-      contract.functions.getCurrentToken().then(res => {
+      props.contract.functions.getCurrentToken().then(res => {
         nextToken.value = res[0].toString();
       });
     };
@@ -315,9 +306,9 @@ export default defineComponent({
     updateNextToken();
     
     const mintNouns = async () => {
-      await provider.send("eth_requestAccounts", []);
+      await props.provider.send("eth_requestAccounts", []);
       
-      const signer = provider.getSigner();
+      const signer = props.provider.getSigner();
       const contractWithSigner = new ethers.Contract(
         contractAddress,
         nounsTokenJson.abi,
@@ -350,7 +341,6 @@ export default defineComponent({
     });
 
     return {
-      hasMetaMask,
       loading,
       mintNouns,
       contractAddress,
@@ -361,7 +351,6 @@ export default defineComponent({
       currentPrice,
       currentToken,
 
-      accounts,
       buying,
 
       fireOn,

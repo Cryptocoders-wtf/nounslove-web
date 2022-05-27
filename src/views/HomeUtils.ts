@@ -1,4 +1,4 @@
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, Ref } from "vue";
 
 import { ethers } from "ethers";
 
