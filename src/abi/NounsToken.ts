@@ -1,4 +1,4 @@
-{
+const abi = {
   "_format": "hh-sol-artifact-1",
   "contractName": "NounsToken",
   "sourceName": "contracts/NounsToken.sol",
@@ -1294,3 +1294,4 @@
   "linkReferences": {},
   "deployedLinkReferences": {}
 }
+export default abi;
