@@ -45,7 +45,7 @@ export const usePrice = (contract: ethers.Contract) => {
 };
 
 export const useWatchTransaction = (
-  provider: any,
+  provider: ethers.providers.Web3Provider,
   callback: (status: number) => void
 ) => {
   const transactionHash = ref("");
@@ -58,7 +58,9 @@ export const useWatchTransaction = (
       const receipt = await provider.getTransactionReceipt(hash);
       if (receipt) {
         loop = false;
-        callback(receipt.status);
+        if (receipt.status) {
+          callback(receipt.status);
+        }
       }
       console.log("loop");
     }

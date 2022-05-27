@@ -9,6 +9,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, reactive, watch, computed } from "vue";
+import { Engine } from "tsparticles-engine";
 import { loadFireworksPreset } from "tsparticles-preset-fireworks";
 import { loadFountainPreset } from "tsparticles-preset-fountain";
 
@@ -25,7 +26,7 @@ export default defineComponent({
       particlesLoaded: () => {
         console.log(presets[seed]);
       },
-      particlesInit: async (engine: any) => {
+      particlesInit: async (engine: Engine) => {
         await loadFireworksPreset(engine);
         await loadFountainPreset(engine);
         await loadSeaAnemonePreset(engine);
