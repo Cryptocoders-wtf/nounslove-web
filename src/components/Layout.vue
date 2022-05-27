@@ -27,9 +27,9 @@ import { ethers } from "ethers";
 import { useI18nParam } from "@/i18n/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const nounsTokenJson = require("../views/NounsTokenLocal.json");
+const nounsTokenJson = require("../abi/NounsToken.json");
 
-import { ethereumConfig } from "../config/project";
+import { ethereumConfig } from "@/config/project";
 
 export default defineComponent({
   name: "AppLayout",

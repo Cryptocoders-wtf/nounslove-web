@@ -2,8 +2,8 @@ import { ref, computed, watch, Ref } from "vue";
 
 import { ethers } from "ethers";
 
-import { useTimerBase, currentTime } from "../utils/utils";
-import { sleep } from "../utils/utils";
+import { useTimerBase, currentTime } from "@/utils/utils";
+import { sleep } from "@/utils/utils";
 
 export const usePrice = (contract: ethers.Contract) => {
   const mintTime = ref(0);

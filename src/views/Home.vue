@@ -151,10 +151,10 @@ import { useI18n } from "vue-i18n";
 import { ethers } from "ethers";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const nounsTokenJson = require("./NounsTokenLocal.json");
+const nounsTokenJson = require("../abi/NounsToken.json");
 
-import { ethereumConfig } from "../config/project";
-import { sleep } from "../utils/utils";
+import { ethereumConfig } from "@/config/project";
+import { sleep } from "@/utils/utils";
 import {
   usePrice,
   useWatchTransaction,

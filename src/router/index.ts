@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
-import Layout from "../components/Layout.vue";
-import Blank from "../components/Blank.vue";
-import NotFound from "../components/NotFound.vue";
+import Layout from "@/components/Layout.vue";
+import Blank from "@/components/Blank.vue";
+import NotFound from "@/components/NotFound.vue";
 
-import Home from "../views/Home.vue";
-import About from "../views/About.vue";
+import Home from "@/views/Home.vue";
+import About from "@/views/About.vue";
 
 const routeChildren: Array<RouteRecordRaw> = [
   {
