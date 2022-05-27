@@ -4,8 +4,11 @@
       <h1>{{ $t("installMetaMask") }}</h1>
     </div>
     <div v-else-if="!isValidChain">
-      <h1>Invalid Netword</h1>
-      You need to connect to {{networdName}}
+      <h1>{{ $t("invalidNetwork") }}</h1>
+      {{ $t("youNeetNet", {networdName}) }}
+      <div class="text-left ml-6">
+        <Languages />
+      </div>
     </div>
     <template v-else>
       <template v-if="contract && provider">
@@ -26,6 +29,8 @@ import { ethers } from "ethers";
 
 import { useI18nParam } from "@/i18n/utils";
 
+import Languages from "@/components/Languages.vue";
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const nounsTokenJson = require("../abi/NounsToken.json");
 
@@ -33,7 +38,9 @@ import { ethereumConfig } from "@/config/project";
 
 export default defineComponent({
   name: "AppLayout",
-  components: {},
+  components: {
+    Languages,
+  },
   async setup() {
     const store = useStore();
 
@@ -67,20 +74,27 @@ export default defineComponent({
       accounts.value = _accounts;
     });
     ethereum.on("chainChanged", (_chainId: string) => {
+      console.log("change");
       chainId.value = _chainId;
     });
     ethereum.on("connect", (info: any) => {
+      console.log("connect");
       chainId.value = info.chainId;
     });
     ethereum.on("disconnect", (info: any) => {
       chainId.value = "";
     });
-
+    const initChainId = async () => {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const network = await provider.getNetwork();
+      chainId.value = ethers.utils.hexlify(network.chainId);
+    }
+    initChainId();
     switchNetwork(ethereumConfig.chainId);
 
     const isValidChain = computed(() => {
       console.log(chainId.value, ethereumConfig.chainId);
-      return chainId.value === ethereumConfig.chainId;
+      return parseInt(chainId.value) === parseInt(ethereumConfig.chainId)
     });
 
     const provider = computed(() => {

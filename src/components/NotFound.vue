@@ -10,12 +10,22 @@
     class="flex flex-1 flex-col lg:w-1/2 w-full pb-4 px-4"
     >
     <div class="mt-4 font-londrina text-4xl">
-      404: This is not the person, place, or thing you're looking for...
+      {{ $t("notFoundMessage") }}
     </div>
   </div>
+  <div class="text-left ml-6">
+    <Languages />
   </div>
+
+</div>
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-export default defineComponent({});
+import Languages from "@/components/Languages.vue";
+export default defineComponent({
+  components: {
+    Languages,
+  },
+
+});
 </script>
