@@ -4,16 +4,11 @@ import Blank from "@/components/Blank.vue";
 import NotFound from "@/components/NotFound.vue";
 
 import Home from "@/views/Home.vue";
-import About from "@/views/About.vue";
 
 const routeChildren: Array<RouteRecordRaw> = [
   {
     path: "",
     component: Home,
-  },
-  {
-    path: "about",
-    component: About,
   },
 ];
 
