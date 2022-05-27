@@ -85,7 +85,7 @@
         <div class="text-left ml-6">
           <Languages />
         </div>
-
+        <Message />
         <div class="mt-4">
           <div v-for="(tokenId, key) in nftKeys" :key="key" class="mb-2">
             <template v-if="tokenId != currentToken">
@@ -164,11 +164,13 @@ import {
 
 import Animation from "./Animation.vue";
 import Languages from "@/components/Languages.vue";
+import Message from "@/components/Message.vue";
 
 export default defineComponent({
   name: "HomePage",
   components: {
     Animation,
+    Message,
     Languages,
   },
   props: {
@@ -283,7 +285,7 @@ export default defineComponent({
     };
 
     watch(currentToken, async () => {
-      await Promise.all(
+      Promise.all(
         Array.from(Array.from(new Array(10)).keys()).map(async (i: number) => {
           const index = currentToken.value - i;
           if (index >= 0 && !nfts.value[String(index)]) {
