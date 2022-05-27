@@ -11,7 +11,8 @@ export const firebaseConfig = {
 };
 
 export const ethereumConfig = {
-  chainId: '0x04', // local
+  chainId: '0x04', // rinkeby
   networdName: "Rinkeby", 
   contractAddress: "0x1602155eB091F863e7e776a83e1c330c828ede19", 
+  openseaUrl: "https://testnets.opensea.io",
 };

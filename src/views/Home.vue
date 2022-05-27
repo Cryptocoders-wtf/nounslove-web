@@ -17,7 +17,7 @@
         <div v-if="nfts[currentToken] && !fireOn" class="sm:flex">
           <div class="sm:w-1/2 w-full" :class="bgColor">
             <a
-              :href="`https://testnets.opensea.io/assets/${contractAddress}/${currentToken}`"
+              :href="`${openseaUrl}/assets/${contractAddress}/${currentToken}`"
               target="_blank"
             >
               <img :src="nfts[currentToken].data?.image" class="w-full" />
@@ -92,7 +92,7 @@
               <div class="flex">
                 <div class="flex-1">
                   <a
-                    :href="`https://testnets.opensea.io/assets/${contractAddress}/${tokenId}`"
+                    :href="`${openseaUrl}/assets/${contractAddress}/${tokenId}`"
                     target="_blank"
                   >
                     <img
@@ -196,7 +196,7 @@ export default defineComponent({
 
     const buying = reactive<{ [key: string]: boolean }>({});
 
-    const { contractAddress } = ethereumConfig;
+    const { contractAddress, openseaUrl } = ethereumConfig;
 
     const { currentPrice, mintTime } = usePrice(props.contract);
     const { currentToken, nextToken } = useCurrentAndNextToken();
@@ -352,7 +352,8 @@ export default defineComponent({
       loading,
       mintNouns,
       contractAddress,
-
+      openseaUrl,
+      
       nfts,
       nftKeys,
       owners,
