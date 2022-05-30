@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, computed, watch } from "vue";
+import { defineComponent, ref, reactive, computed, watch, onMounted } from "vue";
 import { useStore } from "vuex";
 import { ethers } from "ethers";
 
@@ -88,9 +88,10 @@ export default defineComponent({
       const network = await provider.getNetwork();
       chainId.value = ethers.utils.hexlify(network.chainId);
     };
-    initChainId();
-    switchNetwork(ethereumConfig.chainId);
-
+    onMounted(() => {
+      initChainId();
+      switchNetwork(ethereumConfig.chainId);
+    });
     const isValidChain = computed(() => {
       console.log(chainId.value, ethereumConfig.chainId);
       return parseInt(chainId.value) === parseInt(ethereumConfig.chainId);
