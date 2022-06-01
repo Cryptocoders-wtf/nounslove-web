@@ -2,7 +2,7 @@
   <div class="home">
     <div class="justify-center items-center font-pt-root">
       <div class="w-full h-full">
-        <Animation v-show="fireOn" />
+        <Animation v-if="fireOn" />
       </div>
       <div class="ml-0">
         <!-- on sale noun -->
