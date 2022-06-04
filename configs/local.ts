@@ -11,6 +11,7 @@ export const firebaseConfig = {
 export const ethereumConfig = {
   chainId: '0x539', // local
   networdName: "Local", 
+  alchemyName: "rinkeby",
   contractAddress: "0xE8addD62feD354203d079926a8e563BC1A7FE81e", 
   openseaUrl: "https://opensea.io",
 };

@@ -1,18 +1,17 @@
 export const firebaseConfig = {
-  apiKey: "AIzaSyAd-pX35BsCvIBDXstf_LmQaz82PNFGcMI",
-  authDomain: "fir-vue-startup-kit.firebaseapp.com",
-  databaseURL: "https://fir-vue-startup-kit.firebaseio.com",
-  projectId: "fir-vue-startup-kit",
-  storageBucket: "fir-vue-startup-kit.appspot.com",
-  messagingSenderId: "225404938985",
-  appId: "1:225404938985:web:a2cea9fab1722fce",
-  messageKey:
-    "BGwIKr3yZdXmg4Pl-BpIQX_ETtHYl0RqvAJFoc-hYKFyaoU3wZXarqto5DSq1cemFuARMjFvJ02B83T5ga42MKo",
+  apiKey: "AIzaSyDQmgEdrkTIy2y6UJxHiayKiyZ8lU6CamM",
+  authDomain: "nounslove-b8500.firebaseapp.com",
+  projectId: "nounslove-b8500",
+  storageBucket: "nounslove-b8500.appspot.com",
+  messagingSenderId: "731562541816",
+  appId: "1:731562541816:web:6135349a34011d1fe2f10d",
+  measurementId: "G-8LC43PF8MC"
 };
 
 export const ethereumConfig = {
-  chainId: "0x04", // rinkeby
-  networdName: "Rinkeby",
-  contractAddress: "0x1602155eB091F863e7e776a83e1c330c828ede19",
-  openseaUrl: "https://testnets.opensea.io",
+  chainId: '0x1', // rinkeby
+  networdName: "Mainnet", 
+  alchemyName: undefined,
+  contractAddress: "0xb1B25Eeb1026cB947b3f65a5cc123FC28B13EEe6", 
+  openseaUrl: "https://opensea.io",
 };

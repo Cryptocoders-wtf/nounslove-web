@@ -47,7 +47,7 @@ export const usePrice = (contract: ethers.Contract) => {
 };
 
 export const useWatchTransaction = (
-  provider: ethers.providers.Web3Provider,
+  provider: ethers.providers.Web3Provider | ethers.providers.AlchemyProvider,
   callback: (status: number) => void
 ) => {
   const transactionHash = ref("");

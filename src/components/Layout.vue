@@ -1,9 +1,6 @@
 <template>
   <div class="layout">
-    <div v-if="!hasMetaMask">
-      <h1>{{ $t("installMetaMask") }}</h1>
-    </div>
-    <div v-else-if="!isValidChain">
+    <div v-if="!isValidChain">
       <h1>{{ $t("invalidNetwork") }}</h1>
       {{ $t("youNeetNet", { networdName }) }}
       <div class="text-left ml-6">
@@ -16,6 +13,7 @@
           :contract="contract"
           :provider="provider"
           :accounts="accounts"
+          :hasMetaMask="hasMetaMask"
         />
       </template>
     </template>
@@ -52,13 +50,25 @@ export default defineComponent({
     const chainId = ref("");
     const accounts = ref<string[]>([]);
 
+    const { contractAddress, networdName, alchemyName } = ethereumConfig;
+
     const ethereum = window.ethereum;
     const hasMetaMask = !!ethereum;
     if (!hasMetaMask) {
-      return { hasMetaMask: false };
+      const provider = new ethers.providers.AlchemyProvider(alchemyName);
+      const contract = new ethers.Contract(
+        contractAddress,
+        nounsTokenJson.abi,
+        provider,
+      );
+      return {
+        contract,
+        accounts,
+        isValidChain: true,
+        provider,
+        hasMetaMask,
+      };
     }
-
-    const { contractAddress, networdName } = ethereumConfig;
 
     const switchNetwork = async (chainId: string) => {
       console.log(chainId);

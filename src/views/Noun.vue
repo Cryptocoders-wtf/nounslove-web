@@ -75,7 +75,7 @@ export default defineComponent({
       required: true,
     },
     provider: {
-      type: ethers.providers.Web3Provider,
+      type: [ethers.providers.Web3Provider, ethers.providers.AlchemyProvider],
       required: true,
     },
     accounts: {

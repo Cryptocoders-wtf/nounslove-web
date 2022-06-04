@@ -54,12 +54,21 @@
             </div>
             <div v-else-if="loading" :class="bgColor">Processing...</div>
             <div v-else>
+
               <button
                 @click="mintNouns"
                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2"
-              >
+                v-if="hasMetaMask"
+                >
                 {{ $t("getNoun") }}
               </button>
+              <div
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2"
+                v-else>
+                <a href="https://metamask.io/" target="_blank">
+                  Get the MetaMask to get the NFT
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -91,15 +100,10 @@
             <template v-if="tokenId != currentToken">
               <div class="flex">
                 <div class="flex-1">
-                  <a
-                    :href="`${openseaUrl}/assets/${contractAddress}/${tokenId}`"
-                    target="_blank"
-                  >
                     <img
                       :src="nfts[tokenId].data?.image"
                       class="w-1/2 m-auto"
                     />
-                  </a>
                 </div>
                 <div class="flex-1">
                   <div>
@@ -124,6 +128,14 @@
                   </div>
                   <div class="text-left" v-if="tokenId % 10 !== 0">
                     💖 {{ $t("winningPrice") }} {{ nfts[tokenId].price }}
+                  </div>
+                  <div>
+                    <a
+                      :href="`${openseaUrl}/assets/${contractAddress}/${tokenId}`"
+                      target="_blank"
+                      >
+                      Opensea
+                    </a>
                   </div>
                 </div>
               </div>
@@ -175,11 +187,15 @@ export default defineComponent({
       required: true,
     },
     provider: {
-      type: ethers.providers.Web3Provider,
+      type: [ethers.providers.Web3Provider, ethers.providers.AlchemyProvider],
       required: true,
     },
     accounts: {
       type: Array as PropType<Array<string>>,
+      required: true,
+    },
+    hasMetaMask: {
+      type: Boolean,
       required: true,
     },
   },
@@ -203,6 +219,7 @@ export default defineComponent({
         alert(i18n.t("sorryLowGasPrice"));
       }
     };
+
     const { transactionHash } = useWatchTransaction(
       props.provider,
       txWatchCallback
