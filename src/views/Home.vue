@@ -131,7 +131,7 @@
                   <div class="text-left" v-if="tokenId % 10 !== 0">
                     💖 {{ $t("winningPrice") }} {{ nfts[tokenId].price }}
                   </div>
-                  <div>
+                  <div class="text-left">
                     <a
                       :href="`${openseaUrl}/assets/${contractAddress}/${tokenId}`"
                       target="_blank"
