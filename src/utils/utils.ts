@@ -16,7 +16,10 @@ export const sleep = async (seconds: number) => {
   return await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 };
 
-export const useTimerBase = (getCurrentTime: () => number, sleepTime?: number) => {
+export const useTimerBase = (
+  getCurrentTime: () => number,
+  sleepTime?: number
+) => {
   let loop = true;
 
   const now = ref(getCurrentTime());

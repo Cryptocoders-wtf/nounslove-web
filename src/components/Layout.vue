@@ -23,8 +23,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, computed, watch, onMounted } from "vue";
-import { useStore } from "vuex";
+import {
+  defineComponent,
+  ref,
+  reactive,
+  computed,
+  watch,
+  onMounted,
+} from "vue";
 import { ethers } from "ethers";
 
 import { useI18nParam } from "@/i18n/utils";
@@ -41,8 +47,6 @@ export default defineComponent({
     Languages,
   },
   async setup() {
-    const store = useStore();
-
     useI18nParam();
 
     const chainId = ref("");

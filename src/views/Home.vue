@@ -155,21 +155,11 @@ import {
   useCurrentAndNextToken,
 } from "./HomeUtils";
 
+import { NFT, NFTData } from "./types";
+
 import Animation from "./Animation.vue";
 import Languages from "@/components/Languages.vue";
 import Message from "@/components/Message.vue";
-
-interface NFT {
-  name: string;
-  description: string;
-  image: string;
-}
-interface NFTData {
-  data: NFT;
-  price: number;
-  owner: string;
-  bgColor: string;
-}
 
 export default defineComponent({
   name: "HomePage",
