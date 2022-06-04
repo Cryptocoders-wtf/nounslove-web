@@ -16,11 +16,11 @@
             :class="bgColor"
           >
             <div class="text-left font-londrina text-4xl">
-              <router-link :to="`${prevNounId}`" v-if="prevNounId"
+              <router-link :to="localizedUrl('/noun/' + prevNounId)" v-if="prevNounId"
                 >&lt;</router-link
               >
               {{ nfts[nounId]?.data?.name || "Loading..." }}
-              <router-link :to="`${nextNounId}`" v-if="nextNounId"
+              <router-link :to="localizedUrl('/noun/' + nextNounId)" v-if="nextNounId"
                 >&gt;</router-link
               >
               <br />

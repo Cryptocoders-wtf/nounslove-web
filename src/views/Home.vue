@@ -100,10 +100,12 @@
             <template v-if="tokenId != currentToken">
               <div class="flex">
                 <div class="flex-1">
+                  <router-link :to="localizedUrl('/noun/' + tokenId)">
                     <img
                       :src="nfts[tokenId].data?.image"
                       class="w-1/2 m-auto"
-                    />
+                      />
+                  </router-link>
                 </div>
                 <div class="flex-1">
                   <div>
