@@ -153,6 +153,7 @@ import {
   useWatchTransaction,
   useFire,
   useCurrentAndNextToken,
+  useNFTs,
 } from "./HomeUtils";
 
 import { NFT, NFTData } from "./types";
@@ -187,8 +188,9 @@ export default defineComponent({
     const i18n = useI18n();
     const loading = ref(false);
 
-    const nfts = ref<{ [key: string]: NFTData }>({});
-
+    const { nfts, updateNFT, updateNftData, updateOwnerData } = useNFTs(
+      props.contract
+    );
     const buying = reactive<{ [key: string]: boolean }>({});
 
     const { contractAddress, openseaUrl } = ethereumConfig;
@@ -206,37 +208,6 @@ export default defineComponent({
       txWatchCallback
     );
     const { fire, fireOn } = useFire();
-
-    const updateNftData = async (tokenId: string) => {
-      try {
-        const dataURI = await props.contract.functions.dataURI(tokenId);
-        const data = JSON.parse(
-          Buffer.from(dataURI[0].substring(29), "base64").toString("ascii")
-        );
-        updateNFT(String(tokenId), "data", data);
-      } catch (e) {
-        updateNFT(String(tokenId), "data", {
-          name: "broken",
-          image: "",
-          description: "",
-        });
-      }
-    };
-    const updateOwnerData = async (tokenId: string) => {
-      props.contract.functions.ownerOf(tokenId).then((owner) => {
-        updateNFT(String(tokenId), "owner", owner[0]);
-      });
-      props.contract.functions.tokenPrice(tokenId).then((price) => {
-        updateNFT(String(tokenId), "price", price[0] / 10 ** 18);
-      });
-      props.contract.functions.seeds(tokenId).then((seed) => {
-        updateNFT(
-          String(tokenId),
-          "bgColor",
-          seed.background === 0 ? "bg-nouns-grey" : "bg-nouns-beige"
-        );
-      });
-    };
 
     const initEvent = () => {
       props.contract.removeAllListeners();
@@ -273,18 +244,6 @@ export default defineComponent({
       props.contract.functions.getCurrentToken().then((res) => {
         nextToken.value = res[0].toString();
       });
-    };
-
-    const updateNFT = (
-      index: string,
-      key: string,
-      nft: NFT | number | string
-    ) => {
-      const newNfts = { ...nfts.value };
-      const newData = { ...nfts.value[index] } || {};
-      newData[key as keyof NFTData] = nft as never;
-      newNfts[index] = newData;
-      nfts.value = newNfts;
     };
 
     watch(currentToken, async () => {

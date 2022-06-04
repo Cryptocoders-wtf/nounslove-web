@@ -62,6 +62,8 @@ import Message from "@/components/Message.vue";
 
 import { NFT, NFTData } from "./types";
 
+import { useNFTs } from "./HomeUtils";
+
 export default defineComponent({
   components: {
     Message,
@@ -85,6 +87,10 @@ export default defineComponent({
     const router = useRoute();
     const store = useStore();
 
+    const { nfts, updateNFT, updateNftData, updateOwnerData } = useNFTs(
+      props.contract
+    );
+
     const { contractAddress, openseaUrl } = ethereumConfig;
     const nextToken = ref(0);
     const nounId = computed(() => {
@@ -104,47 +110,6 @@ export default defineComponent({
       }
       return null;
     });
-    const nfts = ref<{ [key: string]: NFTData }>({});
-
-    const updateNFT = (
-      index: string,
-      key: string,
-      nft: NFT | number | string
-    ) => {
-      const newNfts = { ...nfts.value };
-      const newData = { ...nfts.value[index] } || {};
-      newData[key as keyof NFTData] = nft as never;
-      newNfts[index] = newData;
-      nfts.value = newNfts;
-    };
-    const updateNftData = async (tokenId: string) => {
-      try {
-        const dataURI = await props.contract.functions.dataURI(tokenId);
-        const data = JSON.parse(
-          Buffer.from(dataURI[0].substring(29), "base64").toString("ascii")
-        );
-        updateNFT(String(tokenId), "data", data);
-      } catch (e) {
-        console.log(e);
-        updateNFT(String(tokenId), "data", {
-          name: "broken",
-          image: "",
-          description: "",
-        });
-      }
-    };
-    const updateOwnerData = async (tokenId: string) => {
-      props.contract.functions.ownerOf(tokenId).then((owner) => {
-        updateNFT(String(tokenId), "owner", owner[0]);
-      });
-      props.contract.functions.seeds(tokenId).then((seed) => {
-        updateNFT(
-          String(tokenId),
-          "bgColor",
-          seed.background === 0 ? "bg-nouns-grey" : "bg-nouns-beige"
-        );
-      });
-    };
 
     const bgColor = computed(() => {
       const nft = nfts.value[String(nounId.value)];

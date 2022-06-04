@@ -2,6 +2,8 @@ import { ref, computed, watch, Ref } from "vue";
 
 import { ethers } from "ethers";
 
+import { NFT, NFTData } from "./types";
+
 import { useTimerBase, currentTime } from "@/utils/utils";
 import { sleep } from "@/utils/utils";
 
@@ -97,5 +99,61 @@ export const useCurrentAndNextToken = () => {
   return {
     nextToken,
     currentToken,
+  };
+};
+
+export const useNFTs = (contract: ethers.Contract) => {
+  const nfts = ref<{ [key: string]: NFTData }>({});
+
+  const updateNFT = (
+    index: string,
+    key: string,
+    nft: NFT | number | string
+  ) => {
+    const newNfts = { ...nfts.value };
+    const newData = { ...nfts.value[index] } || {};
+    newData[key as keyof NFTData] = nft as never;
+    newNfts[index] = newData;
+    nfts.value = newNfts;
+  };
+
+  const updateNftData = async (tokenId: string) => {
+    try {
+      const dataURI = await contract.functions.dataURI(tokenId);
+      const data = JSON.parse(
+        Buffer.from(dataURI[0].substring(29), "base64").toString("ascii")
+      );
+      updateNFT(String(tokenId), "data", data);
+    } catch (e) {
+      console.log(e);
+      updateNFT(String(tokenId), "data", {
+        name: "broken",
+        image: "",
+        description: "",
+      });
+    }
+  };
+
+  const updateOwnerData = async (tokenId: string) => {
+    contract.functions.ownerOf(tokenId).then((owner) => {
+      updateNFT(String(tokenId), "owner", owner[0]);
+    });
+    contract.functions.tokenPrice(tokenId).then((price) => {
+      updateNFT(String(tokenId), "price", price[0] / 10 ** 18);
+    });
+    contract.functions.seeds(tokenId).then((seed) => {
+      updateNFT(
+        String(tokenId),
+        "bgColor",
+        seed.background === 0 ? "bg-nouns-grey" : "bg-nouns-beige"
+      );
+    });
+  };
+
+  return {
+    nfts,
+    updateNFT,
+    updateNftData,
+    updateOwnerData,
   };
 };
