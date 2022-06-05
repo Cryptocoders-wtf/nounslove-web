@@ -30,10 +30,18 @@
             </div>
             <div class="text-left">
               {{ $t("heldBy") }}
-              <span>
-                {{ (nfts[nounId]?.owner || "").substr(0, 10) || "Loading..."
-                }}<br />
+              <span v-if="nfts[nounId]?.owner">
+                <a
+                  :href="`${openseaUrl}/${nfts[nounId]?.owner}`"
+                  target="_blank"
+                  >
+                  {{ (nfts[nounId]?.owner).substr(0, 10) }}<br />
+                </a>
               </span>
+              <span v-else>
+                Loading...
+              </span>
+
             </div>
           </div>
         </div>

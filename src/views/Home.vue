@@ -39,7 +39,14 @@
             </div>
 
             <div class="text-left font-bold mt-4">
-              👉 {{ $t("currentPrice") }} {{ currentPrice }} Eth
+              <span class="font-bold text-slate-500">
+                {{ $t("currentPrice") }}
+              </span>
+            </div>
+            <div class="text-left">
+              <span class="font-bold text-xl">
+                👉 Ξ {{ currentPrice }}
+              </span>
             </div>
             <div v-if="buying[currentToken]">
               <span class="text-red-600 font-bold">
@@ -47,7 +54,7 @@
                 <div className="flex justify-center p-4">
                   <img
                     class="animate-spin h-4 w-8"
-                    src="@/assets/red160px.png"
+                     src="@/assets/red160px.png"
                   />
                 </div>
               </span>
@@ -57,13 +64,13 @@
 
               <button
                 @click="mintNouns"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-6"
                 v-if="hasMetaMask"
                 >
                 {{ $t("getNoun") }}
               </button>
               <div
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-6"
                 v-else>
                 <a href="https://metamask.io/" target="_blank">
                   Get the MetaMask to get the NFT
@@ -119,24 +126,35 @@
                   <div class="text-left font-bold">
                     {{ nfts[tokenId].data?.description }}
                   </div>
-                  <div class="text-left">
+                  <div class="text-left font-bold text-slate-500 mt-2">
                     {{ $t("heldBy") }}
-                    <span v-if="owners[tokenId]" class="text-red-600 font-bold">
-                      {{ (nfts[tokenId].owner || "").substr(0, 10) }}<br />
-                    </span>
-                    <span v-else>
-                      {{ (nfts[tokenId].owner || "").substr(0, 10) }}<br />
-                    </span>
+                  </div>
+                  <div class="text-left font-bold text-xl">
+                    <a
+                      :href="`${openseaUrl}/${nfts[tokenId]?.owner}`"
+                      target="_blank"
+                      >
+                      <span v-if="owners[tokenId]" class="text-red-600 font-bold">
+                        {{ (nfts[tokenId].owner || "").substr(0, 4) }}..{{ (nfts[tokenId].owner || "").substr(-4) }}
+                        <br />
+                      </span>
+                      <span v-else>
+                        {{ (nfts[tokenId].owner || "").substr(0, 4) }}..{{ (nfts[tokenId].owner || "").substr(-4) }}<br />
+                      </span>
+                    </a>
+                  </div>
+                  <div class="text-left font-bold text-slate-500 mt-2" v-if="tokenId % 10 !== 0">
+                    Winning bid
                   </div>
                   <div class="text-left" v-if="tokenId % 10 !== 0">
-                    💖 {{ $t("winningPrice") }} {{ nfts[tokenId].price }}
+                    <span class="font-bold text-xl">💖 Ξ{{ nfts[tokenId].price }}</span>
                   </div>
-                  <div class="text-left">
+                  <div class="text-left mt-2 font-bold text-slate-500">
                     <a
                       :href="`${openseaUrl}/assets/${contractAddress}/${tokenId}`"
                       target="_blank"
                       >
-                      Opensea
+                      OpenSea
                     </a>
                   </div>
                 </div>
