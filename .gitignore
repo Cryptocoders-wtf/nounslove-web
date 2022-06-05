@@ -23,3 +23,5 @@ pnpm-debug.log*
 *.sw?
 
 *~
+
+functions/src/functions/NounsToken.ts
