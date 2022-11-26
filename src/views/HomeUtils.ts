@@ -19,11 +19,13 @@ export const usePrice = (contract: ethers.Contract) => {
 
   const initPrice = async (_contract: ethers.Contract) => {
     const priceData = await _contract.functions.getPriceData();
+
     const [a, b, c, d, e] = priceData[0];
     maxPrice.value = a / 10 ** 18;
     minPrice.value = b / 10 ** 18;
     priceDelta.value = c / 10 ** 18;
     timeDelta.value = d.toNumber();
+    console.log(  maxPrice.value,  minPrice.value , priceDelta.value);
   };
 
   const currentPrice = computed(() => {

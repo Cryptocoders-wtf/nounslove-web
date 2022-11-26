@@ -12,6 +12,6 @@ export const ethereumConfig = {
   chainId: '0x539', // local
   networdName: "Local", 
   alchemyName: "rinkeby",
-  contractAddress: "0xE8addD62feD354203d079926a8e563BC1A7FE81e", 
+  contractAddress: "0x87006e75a5B6bE9D1bbF61AC8Cd84f05D9140589", 
   openseaUrl: "https://opensea.io",
 };

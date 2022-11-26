@@ -25,10 +25,12 @@ const nounPage = async (req: any, res: any) => {
     return res.status(404).send(template_data);
   }
 
-  const url = "https://nouns.love/api/image/" + tokenId;
+  const imageUrl = "https://nouns.love/api/image/" + tokenId;
+  const url = '<meta property="og:url" content="https://nouns.love/noun/' + tokenId + '" />';
   res.send(
     template_data
-      .replaceAll("https://nouns.love/banner2.jpeg", url)
+      .replaceAll("https://nouns.love/banner2.jpeg", imageUrl)
+      .replaceAll('<meta property="og:url" content="https://nouns.love/"/>', url)
   );
 };
 

@@ -9,9 +9,9 @@ export const firebaseConfig = {
 };
 
 export const ethereumConfig = {
-  chainId: '0x1', // rinkeby
-  networdName: "Mainnet", 
-  alchemyName: undefined,
-  contractAddress: "0xb1B25Eeb1026cB947b3f65a5cc123FC28B13EEe6", 
+  chainId: '0x539', // local
+  networdName: "Local", 
+  alchemyName: "rinkeby",
+  contractAddress: "0x114e375B6FCC6d6fCb68c7A1d407E652C54F25FB", 
   openseaUrl: "https://opensea.io",
 };

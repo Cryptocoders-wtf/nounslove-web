@@ -6,7 +6,7 @@
   "functions": {
     "predeploy": [
       "cp dist/index.html functions/templates/index.html",
-      "cp src/abi/NounsToken.ts functions/src/functions/NounsToken.ts"
+      "cp src/abi/NounsToken.ts functions/src/functions/NounsToken.ts",
       "npm --prefix \"$RESOURCE_DIR\" run lint",
       "npm --prefix \"$RESOURCE_DIR\" run build"
     ]
